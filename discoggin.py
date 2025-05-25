@@ -11,6 +11,7 @@ config.read('app.config')
 
 bottoken = config['DEFAULT']['BotToken']
 
+### handler will be WatchedFileHandler
 logging.basicConfig(
     format = '[%(levelname).1s %(asctime)s] %(message)s',
     datefmt = '%b-%d %H:%M:%S',
@@ -18,8 +19,8 @@ logging.basicConfig(
     # handlers = [ loghandler ],
 )
 
-intents = discord.Intents.default()
-intents.message_content = True
+intents = discord.Intents(messages=True, guild_messages=True, dm_messages=True,  message_content=True)
+### members? needs additional bot priv
 
 client = discord.Client(intents=intents)
 
@@ -32,7 +33,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello there!')
+    if message.content.startswith('>'):
+        logging.info('Command: %r', message.content)
+        await message.channel.send('Command received.')
 
-client.run(bottoken)
+client.run(bottoken)  ### log_handler=...
