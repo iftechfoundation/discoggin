@@ -36,15 +36,11 @@ class DiscogClient(discord.Client):
             logging.info('syncing slash commands...')
             await self.tree.sync()
 
-def build_client(client):
-
-    @client.event
-    async def on_ready():
-        logging.info('We have logged in as %s', client.user)
+    async def on_ready(self):
+        logging.info('We have logged in as %s', self.user)
     
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
+    async def on_message(self, message):
+        if message.author == self.user:
             return
     
         if message.content.startswith('>'):
@@ -52,6 +48,8 @@ def build_client(client):
             await message.channel.send('Command received.')
     
     
+def build_client(client):
+
     @client.tree.command()
     async def hello(interaction):
         """Says hello!"""
