@@ -1,6 +1,8 @@
-import configparser
-import discord
 import logging
+import configparser
+
+import discord
+import discord.app_commands
 
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
@@ -22,7 +24,11 @@ logging.basicConfig(
 intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
 ### members? needs additional bot priv
 
-client = discord.Client(intents=intents)
+class DiscogClient(discord.Client):
+    def __init__(self, intents):
+        super().__init__(intents=intents)
+        
+client = DiscogClient(intents=intents)
 
 @client.event
 async def on_ready():
