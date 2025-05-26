@@ -1,9 +1,12 @@
 import logging, logging.handlers
 import configparser
+import json
+import subprocess
 
 import discord
 import discord.app_commands
 
+from discoglib.glk import create_metrics
 from discoglib.markup import extract_command
 
 # Based on the discord.py library:
@@ -16,6 +19,7 @@ config.read('app.config')
 bottoken = config['DEFAULT']['BotToken']
 logfilepath = config['DEFAULT']['LogFile']
 
+gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
 
 loghandler = logging.handlers.WatchedFileHandler(logfilepath)
 logformatter = logging.Formatter('[%(levelname).1s %(asctime)s] %(message)s', datefmt='%b-%d %H:%M:%S')
@@ -31,6 +35,7 @@ intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_me
 class DiscogClient(discord.Client):
     def __init__(self, intents):
         super().__init__(intents=intents)
+        self.gamegen = None
         self.tree = discord.app_commands.CommandTree(self)
 
         @self.tree.command(name='hello', description='Greet the user')
@@ -56,7 +61,25 @@ class DiscogClient(discord.Client):
         cmd = extract_command(message.content)
         if cmd is not None:
             logging.info('Command: %s', cmd)
-            await message.channel.send('Command received: %s' % (cmd,))
+            if self.gamegen is None:
+                update = {
+                    'type':'init', 'gen':0,
+                    'metrics': create_metrics(),
+                    'support': [ 'timer', 'hyperlinks' ],
+                }
+                cmd = json.dumps(update)
+                
+                args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
+            else:
+                raise Exception('### no followup')
+            
+            proc = subprocess.Popen(
+                args,
+                bufsize=0,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
+            
+            await message.channel.send('Command received: %s' % (outdat,))
     
         
 client = DiscogClient(intents=intents)
