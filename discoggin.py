@@ -31,6 +31,11 @@ class DiscogClient(discord.Client):
         super().__init__(intents=intents)
         self.tree = discord.app_commands.CommandTree(self)
 
+        @self.tree.command(name='hello', description='Greet the user')
+        async def hellofunc(interaction):
+            logging.info('slash command: hello')
+            await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+        
     async def setup_hook(self):
         if False:
             logging.info('syncing slash commands...')
@@ -47,17 +52,8 @@ class DiscogClient(discord.Client):
             logging.info('Command: %r', message.content)
             await message.channel.send('Command received.')
     
-    
-def build_client(client):
-
-    @client.tree.command(description='Greet the user')
-    async def hello(interaction):
-        logging.info('slash command: hello')
-        await interaction.response.send_message(f'Hi, {interaction.user.mention}')
-    
         
 client = DiscogClient(intents=intents)
-build_client(client)
 
 client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
