@@ -1,5 +1,6 @@
 import re
 
+### what to do about multiline inputs?
 pat_cmd = re.compile('^[\\s]*>(.*)$')
 
 def extract_command(msg):
