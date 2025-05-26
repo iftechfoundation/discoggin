@@ -73,8 +73,12 @@ class DiscogClient(discord.Client):
                 
                 args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
             else:
-                input = self.glkstate.construct_input(cmd)
-                indat = json.dumps(input)
+                try:
+                    input = self.glkstate.construct_input(cmd)
+                    indat = json.dumps(input)
+                except Exception as ex:
+                    await message.channel.send('Unable to construct input: %s' % (ex,))
+                    return
                 
                 args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', 'savedir', gamefile ]
 
@@ -107,13 +111,18 @@ class DiscogClient(discord.Client):
 
             if self.glkstate is None:
                 self.glkstate = GlkState()
-            self.glkstate.accept_update(update)
+            try:
+                self.glkstate.accept_update(update)
+            except Exception as ex:
+                await message.channel.send('Update error: %s' % (ex,))
+                return
 
             outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
-            if outls:
-                out = '\n'.join(outls)
+            ### split by 2000 characters
+            out = '\n'.join(outls)
+            if out.strip():
                 await message.channel.send(out)
-    
+            ### otherwise show status line? or something?
         
 client = DiscogClient(intents=intents)
 
