@@ -35,29 +35,32 @@ class DiscogClient(discord.Client):
         if False:
             logging.info('syncing slash commands...')
             await self.tree.sync()
+
+def build_client(client):
+
+    @client.event
+    async def on_ready():
+        logging.info('We have logged in as %s', client.user)
+    
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
+    
+        if message.content.startswith('>'):
+            logging.info('Command: %r', message.content)
+            await message.channel.send('Command received.')
+    
+    
+    @client.tree.command()
+    async def hello(interaction):
+        """Says hello!"""
+        logging.info('slash command: hello')
+        await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+    
         
 client = DiscogClient(intents=intents)
-
-@client.event
-async def on_ready():
-    logging.info('We have logged in as %s', client.user)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    if message.content.startswith('>'):
-        logging.info('Command: %r', message.content)
-        await message.channel.send('Command received.')
-
-
-@client.tree.command()
-async def hello(interaction):
-    """Says hello!"""
-    logging.info('slash command: hello')
-    await interaction.response.send_message(f'Hi, {interaction.user.mention}')
-
+build_client(client)
 
 client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
