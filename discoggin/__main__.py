@@ -69,11 +69,14 @@ class DiscogClient(discord.Client):
                     'metrics': create_metrics(),
                     'support': [ 'timer', 'hyperlinks' ],
                 }
-                cmd = json.dumps(update)
+                indat = json.dumps(update)
                 
                 args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
             else:
-                raise Exception('### no followup')
+                input = self.glkstate.construct_input(cmd)
+                indat = json.dumps(input)
+                
+                args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', 'savedir', gamefile ]
 
             try:
                 proc = subprocess.Popen(
@@ -81,7 +84,7 @@ class DiscogClient(discord.Client):
                     bufsize=0,
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE)
                 ### timeout parameter?
-                (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
+                (outdat, errdat) = proc.communicate((indat+'\n').encode(), timeout=2)
             except Exception as ex:
                 logging.error('Interpreter exception: %s', ex, exc_info=ex)
                 await message.channel.send('Interpreter exception: %s' % (ex,))
@@ -102,7 +105,8 @@ class DiscogClient(discord.Client):
                 await message.channel.send('Interpreter error: %s' % (msg,))
                 return
 
-            self.glkstate = GlkState()
+            if self.glkstate is None:
+                self.glkstate = GlkState()
             self.glkstate.accept_update(update)
 
             outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]

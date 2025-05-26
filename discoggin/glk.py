@@ -115,6 +115,20 @@ class GlkState:
                 #if input.get('mouse'):
                 #    self.mouseinputwin = input.get('id')
 
+    def construct_input(self, cmd):
+        if self.lineinputwin:
+            return {
+                'type':'line', 'gen':self.generation,
+                'window':self.lineinputwin, 'value':cmd
+            }
+        if self.charinputwin:
+            ### adjust cmd for special cases? arrow keys?
+            return {
+                'type':'char', 'gen':self.generation,
+                'window':self.charinputwin, 'value':cmd
+            }
+        raise Exception('game is not expecting input')
+                
 class ContentLine:
     def __init__(self):
         self.arr = []
