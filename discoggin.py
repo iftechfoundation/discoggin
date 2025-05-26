@@ -27,6 +27,12 @@ intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_me
 class DiscogClient(discord.Client):
     def __init__(self, intents):
         super().__init__(intents=intents)
+        self.tree = discord.app_commands.CommandTree(self)
+
+    async def setup_hook(self):
+        if False:
+            logging.info('syncing slash commands...')
+            await self.tree.sync()
         
 client = DiscogClient(intents=intents)
 
@@ -42,5 +48,13 @@ async def on_message(message):
     if message.content.startswith('>'):
         logging.info('Command: %r', message.content)
         await message.channel.send('Command received.')
+
+
+@client.tree.command()
+async def hello(interaction):
+    """Says hello!"""
+    logging.info('slash command: hello')
+    await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+
 
 client.run(bottoken)  ### log_handler=...
