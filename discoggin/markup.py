@@ -23,7 +23,7 @@ def content_to_markup(dat):
         res.append(val)
     return ''.join(res)
 
-pat_singlechar = re.compile('[`*_]')
+pat_singlechar = re.compile('[`*_<>\\\\]')
 
 def escape(val):
     val = pat_singlechar.sub(lambda match:'\\'+match.group(0), val)
