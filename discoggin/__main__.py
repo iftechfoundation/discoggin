@@ -12,14 +12,14 @@ from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
 
-# Based on the discord.py library:
-#    https://github.com/Rapptz/discord.py/
-
 popt = optparse.OptionParser(usage='python -m discoggin')
 
 popt.add_option('--cmdsync',
                 action='store_true', dest='cmdsync',
                 help='upload slash commands to Discord')
+popt.add_option('--logstream',
+                action='store_true', dest='logstream',
+                help='log to stdout rather than the configured file')
 
 (opts, args) = popt.parse_args()
 
@@ -32,7 +32,10 @@ logfilepath = config['DEFAULT']['LogFile']
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
 
-loghandler = logging.handlers.WatchedFileHandler(logfilepath)
+if opts.logstream:
+    loghandler = logging.StreamHandler(sys.stdout)
+else:
+    loghandler = logging.handlers.WatchedFileHandler(logfilepath)
 logformatter = logging.Formatter('[%(levelname).1s %(asctime)s] %(message)s', datefmt='%b-%d %H:%M:%S')
 loghandler.setFormatter(logformatter)
 
@@ -40,13 +43,13 @@ rootlogger = logging.getLogger()
 rootlogger.addHandler(loghandler)
 rootlogger.setLevel(logging.INFO)
 
-intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
-### members? needs additional bot priv
-
 class DiscogClient(discord.Client):
-    def __init__(self, intents):
+    def __init__(self):
+        intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
+        ### members? needs additional bot priv
+
         super().__init__(intents=intents)
-        self.glkstate = None
+        
         self.tree = discord.app_commands.CommandTree(self)
 
         self.tree.add_command(discord.app_commands.Command(
@@ -58,6 +61,8 @@ class DiscogClient(discord.Client):
         self.tree.add_command(discord.app_commands.Command(
             name='status', callback=self.on_cmd_status,
             description='Display the status window'))
+
+        self.glkstate = None  ###
         
     async def setup_hook(self):
         if opts.cmdsync:
@@ -183,7 +188,7 @@ class DiscogClient(discord.Client):
                 await chan.send('>\n'+out)
         ### otherwise show status line? or something?
         
-client = DiscogClient(intents=intents)
+client = DiscogClient()
 
 client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
