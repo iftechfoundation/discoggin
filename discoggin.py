@@ -4,6 +4,8 @@ import configparser
 import discord
 import discord.app_commands
 
+from discoglib.markup import extract_command
+
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
 
@@ -47,10 +49,11 @@ class DiscogClient(discord.Client):
     async def on_message(self, message):
         if message.author == self.user:
             return
-    
-        if message.content.startswith('>'):
-            logging.info('Command: %r', message.content)
-            await message.channel.send('Command received.')
+
+        cmd = extract_command(message.content)
+        if cmd is not None:
+            logging.info('Command: %s', cmd)
+            await message.channel.send('Command received: %s' % (cmd,))
     
         
 client = DiscogClient(intents=intents)
