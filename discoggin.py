@@ -1,4 +1,4 @@
-import logging
+import logging, logging.handlers
 import configparser
 
 import discord
@@ -12,13 +12,15 @@ config = configparser.ConfigParser()
 config.read('app.config')
 
 bottoken = config['DEFAULT']['BotToken']
+logfilepath = config['DEFAULT']['LogFile']
 
-### handler will be WatchedFileHandler
+
+loghandler = logging.handlers.WatchedFileHandler(logfilepath)
 logging.basicConfig(
     format = '[%(levelname).1s %(asctime)s] %(message)s',
     datefmt = '%b-%d %H:%M:%S',
     level = logging.INFO,
-    # handlers = [ loghandler ],
+    handlers = [ loghandler ],
 )
 
 intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
@@ -57,4 +59,5 @@ async def hello(interaction):
     await interaction.response.send_message(f'Hi, {interaction.user.mention}')
 
 
-client.run(bottoken)  ### log_handler=...
+client.run(bottoken, log_handler=loghandler)
+
