@@ -50,9 +50,8 @@ class DiscogClient(discord.Client):
     
 def build_client(client):
 
-    @client.tree.command()
+    @client.tree.command(description='Greet the user')
     async def hello(interaction):
-        """Says hello!"""
         logging.info('slash command: hello')
         await interaction.response.send_message(f'Hi, {interaction.user.mention}')
     
