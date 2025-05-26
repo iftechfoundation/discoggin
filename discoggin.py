@@ -35,8 +35,7 @@ class DiscogClient(discord.Client):
 
         @self.tree.command(name='hello', description='Greet the user')
         async def hellofunc(interaction):
-            logging.info('slash command: hello')
-            await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+            await self.on_cmd_hello(interaction)
         
     async def setup_hook(self):
         if False:
@@ -45,6 +44,10 @@ class DiscogClient(discord.Client):
 
     async def on_ready(self):
         logging.info('We have logged in as %s', self.user)
+
+    async def on_cmd_hello(self, interaction):
+        logging.info('slash command: hello')
+        await interaction.response.send_message(f'Hi, {interaction.user.mention}')
     
     async def on_message(self, message):
         if message.author == self.user:
