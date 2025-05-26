@@ -19,7 +19,7 @@ logging.basicConfig(
     # handlers = [ loghandler ],
 )
 
-intents = discord.Intents(messages=True, guild_messages=True, dm_messages=True,  message_content=True)
+intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
 ### members? needs additional bot priv
 
 client = discord.Client(intents=intents)
