@@ -65,6 +65,7 @@ class GlkState:
                     raise Exception('No such window')
                 if win.get('type') == 'buffer':
                     self.storywindat = []
+                    ### preserve last line if we start with append...
                     text = content.get('text')
                     if text:
                         for line in text:
