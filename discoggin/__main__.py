@@ -63,7 +63,8 @@ class DiscogClient(discord.Client):
         if self.glkstate is not None:
             await interaction.response.send_message('The game is already running.')
             return
-        await interaction.response.send_message('Game has been started.')
+        await interaction.response.send_message('Game is starting...')
+        await self.run_turn(None, interaction.channel)
     
     async def on_cmd_stop(self, interaction):
         logging.info('slash command: stop')
@@ -80,7 +81,11 @@ class DiscogClient(discord.Client):
             return
         chan = interaction.channel
         await interaction.response.send_message('Status line displayed.', ephemeral=True)
-        await chan.send()
+        outls = [ content_to_markup(val) for val in self.glkstate.statuswindat ]
+        outls = rebalance_output(outls)
+        for out in outls:
+            if out.strip():
+                await chan.send('|\n'+out)
         
     async def on_message(self, message):
         if message.author == self.user:
@@ -95,7 +100,15 @@ class DiscogClient(discord.Client):
             await self.run_turn(cmd, message.channel)
 
     async def run_turn(self, cmd, chan):
+        if not chan:
+            logging.warning('run_turn: channel not set')
+            return
+            
         if self.glkstate is None:
+            if cmd is not None:
+                logging.warning('Tried to send command when game was not running: %s', cmd)
+                return
+            
             update = {
                 'type':'init', 'gen':0,
                 'metrics': create_metrics(),
@@ -105,6 +118,10 @@ class DiscogClient(discord.Client):
             
             args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
         else:
+            if cmd is None:
+                logging.warning('Tried to send no command when game was running')
+                return
+                
             try:
                 input = self.glkstate.construct_input(cmd)
                 indat = json.dumps(input)

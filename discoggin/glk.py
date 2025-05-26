@@ -13,7 +13,7 @@ def create_metrics(width=None, height=None):
 
 class GlkState:
     def __init__(self):
-        # Lists of line data lists
+        # Lists of ContentLines
         self.statuswindat = []
         self.storywindat = []
         self.graphicswindat = []
@@ -54,7 +54,7 @@ class GlkState:
             if totalheight < len(self.statuswindat):
                 self.statuswindat = self.statuswindat[0:totalheight]
             while totalheight > len(self.statuswindat):
-                self.statuswindat.append([])
+                self.statuswindat.append(ContentLine())
 
         contents = update.get('content')
         if contents is not None:
@@ -80,7 +80,7 @@ class GlkState:
                         linenum = self.statuslinestarts[id] + line.get('line')
                         dat = extract_raw(line)
                         if linenum >= 0 and linenum < len(self.statuswindat):
-                            self.statuswindat[linenum].append(dat)
+                            self.statuswindat[linenum] = dat
                 elif win.get('type') == 'graphics':
                     self.graphicswin = []
                     self.graphicswindat = []
