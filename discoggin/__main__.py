@@ -62,67 +62,69 @@ class DiscogClient(discord.Client):
         cmd = extract_command(message.content)
         if cmd is not None:
             logging.info('Command: %s', cmd) ###
+            await self.run_turn(cmd, message.channel)
+
+    async def run_turn(self, cmd, chan):
+        if self.glkstate is None:
+            update = {
+                'type':'init', 'gen':0,
+                'metrics': create_metrics(),
+                'support': [ 'timer', 'hyperlinks' ],
+            }
+            indat = json.dumps(update)
             
-            if self.glkstate is None:
-                update = {
-                    'type':'init', 'gen':0,
-                    'metrics': create_metrics(),
-                    'support': [ 'timer', 'hyperlinks' ],
-                }
-                indat = json.dumps(update)
-                
-                args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
-            else:
-                try:
-                    input = self.glkstate.construct_input(cmd)
-                    indat = json.dumps(input)
-                except Exception as ex:
-                    await message.channel.send('Unable to construct input: %s' % (ex,))
-                    return
-                
-                args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', 'savedir', gamefile ]
-
+            args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
+        else:
             try:
-                proc = subprocess.Popen(
-                    args,
-                    bufsize=0,
-                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                ### timeout parameter?
-                (outdat, errdat) = proc.communicate((indat+'\n').encode(), timeout=2)
+                input = self.glkstate.construct_input(cmd)
+                indat = json.dumps(input)
             except Exception as ex:
-                logging.error('Interpreter exception: %s', ex, exc_info=ex)
-                await message.channel.send('Interpreter exception: %s' % (ex,))
+                await chan.send('Unable to construct input: %s' % (ex,))
                 return
-                
-            if errdat:
-                await message.channel.send('Interpreter stderr: %s' % (errdat,))
-                # but try to continue
+            
+            args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', 'savedir', gamefile ]
 
-            try:
-                update = json.loads(outdat)
-            except:
-                await message.channel.send('Invalid JSON output: %s' % (outdat,))
-                return
+        try:
+            proc = subprocess.Popen(
+                args,
+                bufsize=0,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            ### timeout parameter?
+            (outdat, errdat) = proc.communicate((indat+'\n').encode(), timeout=2)
+        except Exception as ex:
+            logging.error('Interpreter exception: %s', ex, exc_info=ex)
+            await chan.send('Interpreter exception: %s' % (ex,))
+            return
+            
+        if errdat:
+            await chan.send('Interpreter stderr: %s' % (errdat,))
+            # but try to continue
 
-            if update.get('type') == 'error':
-                msg = update.get('message', '???')
-                await message.channel.send('Interpreter error: %s' % (msg,))
-                return
+        try:
+            update = json.loads(outdat)
+        except:
+            await chan.send('Invalid JSON output: %s' % (outdat,))
+            return
 
-            if self.glkstate is None:
-                self.glkstate = GlkState()
-            try:
-                self.glkstate.accept_update(update)
-            except Exception as ex:
-                await message.channel.send('Update error: %s' % (ex,))
-                return
+        if update.get('type') == 'error':
+            msg = update.get('message', '???')
+            await chan.send('Interpreter error: %s' % (msg,))
+            return
 
-            outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
-            outls = rebalance_output(outls)
-            for out in outls:
-                if out.strip():
-                    await message.channel.send(out)
-            ### otherwise show status line? or something?
+        if self.glkstate is None:
+            self.glkstate = GlkState()
+        try:
+            self.glkstate.accept_update(update)
+        except Exception as ex:
+            await chan.send('Update error: %s' % (ex,))
+            return
+
+        outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
+        outls = rebalance_output(outls)
+        for out in outls:
+            if out.strip():
+                await chan.send('>\n'+out)
+        ### otherwise show status line? or something?
         
 client = DiscogClient(intents=intents)
 

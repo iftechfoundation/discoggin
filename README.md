@@ -1,2 +1,2 @@
-# Discoggin -- a Discord bot to play parser IF games
+# Discoggin -- a Discord bot for playing parser IF games
 
