@@ -70,9 +70,9 @@ class GlkState:
                         for line in text:
                             dat = extract_raw(line)
                             if line.get('append') and len(self.storywindat):
-                                self.storywindat[-1].append(dat)
+                                self.storywindat[-1].extend(dat)
                             else:
-                                self.storywindat.append([dat])
+                                self.storywindat.append(dat)
                 elif win.get('type') == 'grid':
                     lines = content.get('lines')
                     for line in lines:
@@ -120,10 +120,13 @@ class ContentLine:
         self.arr = []
 
     def __repr__(self):
-        return repr(self.arr)
+        return 'C:'+repr(self.arr)
 
     def add(self, text='', style='normal'):
         self.arr.append( (text, style) )
+
+    def extend(self, dat):
+        self.arr.extend(dat.arr)
                 
 def extract_raw(line):
     # Extract the content array from a line object.
