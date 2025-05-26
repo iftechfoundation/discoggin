@@ -25,3 +25,40 @@ def content_to_markup(dat):
 
 def escape(val):
     return val
+
+MSG_LIMIT = 1990
+
+def rebalance_output(ls):
+    res = []
+    cur = None
+    for val in ls:
+        if cur is not None:
+            if len(cur)+1+len(val) < MSG_LIMIT:
+                cur += '\n'
+                cur += val
+                continue
+        if cur:
+            res.append(cur)
+            cur = None
+        if len(val) < MSG_LIMIT:
+            cur = val
+            continue
+        # This paragraph is over MSG_LIMIT by itself. Try to split it
+        # up at word boundaries. If we can't do that, just split it.
+        # BUG: This can split a markup span like "_italics_", which will
+        # break the markup.
+        while len(val) > MSG_LIMIT:
+            pos = val[ : MSG_LIMIT ].rfind(' ')
+            if pos >= 0:
+                res.append(val[ : pos ])
+                val = val[ pos+1 : ]
+                continue
+            res.append(val[ : MSG_LIMIT ])
+            val = val[ MSG_LIMIT : ]
+        if val:
+            res.append(val)
+            
+    if cur:
+        res.append(cur)
+        cur = None
+    return res
