@@ -1,5 +1,6 @@
 import sys
 import logging, logging.handlers
+import optparse
 import configparser
 import json
 import subprocess
@@ -14,12 +15,21 @@ from .markup import extract_command, content_to_markup, rebalance_output
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
 
+popt = optparse.OptionParser(usage='python -m discoggin')
+
+popt.add_option('--cmdsync',
+                action='store_true', dest='cmdsync',
+                help='upload slash commands to Discord')
+
+(opts, args) = popt.parse_args()
+
 config = configparser.ConfigParser()
 config.read('app.config')
 
 bottoken = config['DEFAULT']['BotToken']
 logfilepath = config['DEFAULT']['LogFile']
 
+###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
 
 loghandler = logging.handlers.WatchedFileHandler(logfilepath)
@@ -50,7 +60,7 @@ class DiscogClient(discord.Client):
             description='Display the status window'))
         
     async def setup_hook(self):
-        if False:
+        if opts.cmdsync:
             logging.info('syncing slash commands...')
             await self.tree.sync()
 
