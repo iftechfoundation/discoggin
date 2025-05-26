@@ -1,3 +1,4 @@
+import sys
 import logging, logging.handlers
 import configparser
 import json
@@ -6,12 +7,11 @@ import subprocess
 import discord
 import discord.app_commands
 
-from discoglib.glk import create_metrics
-from discoglib.markup import extract_command
+from .glk import create_metrics
+from .markup import extract_command
 
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
-
 
 config = configparser.ConfigParser()
 config.read('app.config')
