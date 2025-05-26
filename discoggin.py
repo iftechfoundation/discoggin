@@ -78,6 +78,7 @@ class DiscogClient(discord.Client):
                 bufsize=0,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
+            ### timeout parameter?
             
             await message.channel.send('Command received: %s' % (outdat,))
     
