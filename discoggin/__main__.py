@@ -61,7 +61,8 @@ class DiscogClient(discord.Client):
 
         cmd = extract_command(message.content)
         if cmd is not None:
-            logging.info('Command: %s', cmd)
+            logging.info('Command: %s', cmd) ###
+            
             if self.glkstate is None:
                 update = {
                     'type':'init', 'gen':0,
@@ -73,18 +74,35 @@ class DiscogClient(discord.Client):
                 args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
             else:
                 raise Exception('### no followup')
-            
-            proc = subprocess.Popen(
-                args,
-                bufsize=0,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
-            ### timeout parameter?
-            ### check errdat
+
+            try:
+                proc = subprocess.Popen(
+                    args,
+                    bufsize=0,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                ### timeout parameter?
+                (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
+            except Exception as ex:
+                logging.error('Interpreter exception: %s', ex, exc_info=ex)
+                await message.channel.send('Interpreter exception: %s' % (ex,))
+                return
+                
+            if errdat:
+                await message.channel.send('Interpreter stderr: %s' % (errdat,))
+                # but try to continue
+
+            try:
+                update = json.loads(outdat)
+            except:
+                await message.channel.send('Invalid JSON output: %s' % (outdat,))
+                return
+
+            if update.get('type') == 'error':
+                msg = update.get('message', '???')
+                await message.channel.send('Interpreter error: %s' % (msg,))
+                return
 
             self.glkstate = GlkState()
-            update = json.loads(outdat)
-
             self.glkstate.accept_update(update)
 
             outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
