@@ -122,8 +122,8 @@ class ContentLine:
     def __repr__(self):
         return 'C:'+repr(self.arr)
 
-    def add(self, text='', style='normal'):
-        self.arr.append( (text, style) )
+    def add(self, text='', style='normal', link=None):
+        self.arr.append( (text, style, link) )
 
     def extend(self, dat):
         self.arr.extend(dat.arr)

@@ -9,7 +9,7 @@ import discord.app_commands
 
 from .glk import create_metrics
 from .glk import GlkState
-from .markup import extract_command
+from .markup import extract_command, content_to_markup
 
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
@@ -86,8 +86,11 @@ class DiscogClient(discord.Client):
             update = json.loads(outdat)
 
             self.glkstate.accept_update(update)
-            
-            await message.channel.send('Command received: %s' % (self.glkstate.storywindat,))
+
+            outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
+            if outls:
+                out = '\n'.join(outls)
+                await message.channel.send(out)
     
         
 client = DiscogClient(intents=intents)
