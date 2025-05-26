@@ -9,7 +9,7 @@ import discord.app_commands
 
 from .glk import create_metrics
 from .glk import GlkState
-from .markup import extract_command, content_to_markup
+from .markup import extract_command, content_to_markup, rebalance_output
 
 # Based on the discord.py library:
 #    https://github.com/Rapptz/discord.py/
@@ -118,10 +118,10 @@ class DiscogClient(discord.Client):
                 return
 
             outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
-            ### split by 2000 characters
-            out = '\n'.join(outls)
-            if out.strip():
-                await message.channel.send(out)
+            outls = rebalance_output(outls)
+            for out in outls:
+                if out.strip():
+                    await message.channel.send(out)
             ### otherwise show status line? or something?
         
 client = DiscogClient(intents=intents)
