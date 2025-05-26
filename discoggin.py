@@ -16,12 +16,12 @@ logfilepath = config['DEFAULT']['LogFile']
 
 
 loghandler = logging.handlers.WatchedFileHandler(logfilepath)
-logging.basicConfig(
-    format = '[%(levelname).1s %(asctime)s] %(message)s',
-    datefmt = '%b-%d %H:%M:%S',
-    level = logging.INFO,
-    handlers = [ loghandler ],
-)
+logformatter = logging.Formatter('[%(levelname).1s %(asctime)s] %(message)s', datefmt='%b-%d %H:%M:%S')
+loghandler.setFormatter(logformatter)
+
+rootlogger = logging.getLogger()
+rootlogger.addHandler(loghandler)
+rootlogger.setLevel(logging.INFO)
 
 intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
 ### members? needs additional bot priv
@@ -59,5 +59,5 @@ async def hello(interaction):
     await interaction.response.send_message(f'Hi, {interaction.user.mention}')
 
 
-client.run(bottoken, log_handler=loghandler)
+client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
