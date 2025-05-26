@@ -29,7 +29,7 @@ class GlkState:
         self.hyperlinkinputwin = None
         self.generation = 0
         
-    def parse_update(self, update):
+    def accept_update(self, update):
         # Parse the update object. This is complicated. For the format,
         # see http://eblong.com/zarf/glk/glkote/docs.html
         
@@ -51,11 +51,9 @@ class GlkState:
             for win in grids:
                 self.statuslinestarts[win.get('id')] = totalheight
                 totalheight += win.get('gridheight', 0)
-            if totalheight < len(self.statuswin):
-                self.statuswin = self.statuswin[0:totalheight]
+            if totalheight < len(self.statuswindat):
                 self.statuswindat = self.statuswindat[0:totalheight]
-            while totalheight > len(self.statuswin):
-                self.statuswin.append('')
+            while totalheight > len(self.statuswindat):
                 self.statuswindat.append([])
 
         contents = update.get('content')
@@ -66,20 +64,11 @@ class GlkState:
                 if not win:
                     raise Exception('No such window')
                 if win.get('type') == 'buffer':
-                    self.storywin = []
                     self.storywindat = []
                     text = content.get('text')
                     if text:
                         for line in text:
-                            dat = self.extract_text(line)
-                            if (opts.verbose == 1):
-                                if (dat != '>'):
-                                    print(dat)
-                            if line.get('append') and len(self.storywin):
-                                self.storywin[-1] += dat
-                            else:
-                                self.storywin.append(dat)
-                            dat = self.extract_raw(line)
+                            dat = extract_raw(line)
                             if line.get('append') and len(self.storywindat):
                                 self.storywindat[-1].append(dat)
                             else:
@@ -88,10 +77,7 @@ class GlkState:
                     lines = content.get('lines')
                     for line in lines:
                         linenum = self.statuslinestarts[id] + line.get('line')
-                        dat = self.extract_text(line)
-                        if linenum >= 0 and linenum < len(self.statuswin):
-                            self.statuswin[linenum] = dat
-                        dat = self.extract_raw(line)
+                        dat = extract_raw(line)
                         if linenum >= 0 and linenum < len(self.statuswindat):
                             self.statuswindat[linenum].append(dat)
                 elif win.get('type') == 'graphics':
@@ -128,4 +114,28 @@ class GlkState:
                     self.hyperlinkinputwin = input.get('id')
                 #if input.get('mouse'):
                 #    self.mouseinputwin = input.get('id')
+
+class ContentLine:
+    def __init__(self):
+        self.arr = []
+
+    def __repr__(self):
+        return repr(self.arr)
+
+    def add(self, text='', style='normal'):
+        self.arr.append( (text, style) )
+                
+def extract_raw(line):
+    # Extract the content array from a line object.
+    res = ContentLine()
+    con = line.get('content')
+    if not con:
+        return res
+    for val in con:
+        if type(val) == str:
+            res.add(val)
+        else:
+            res.add(val.get('text', ''), val.get('style', 'normal'))
+            ### hyperlink
+    return res
 

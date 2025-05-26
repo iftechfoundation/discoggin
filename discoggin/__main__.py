@@ -8,6 +8,7 @@ import discord
 import discord.app_commands
 
 from .glk import create_metrics
+from .glk import GlkState
 from .markup import extract_command
 
 # Based on the discord.py library:
@@ -35,7 +36,7 @@ intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_me
 class DiscogClient(discord.Client):
     def __init__(self, intents):
         super().__init__(intents=intents)
-        self.gamegen = None
+        self.glkstate = None
         self.tree = discord.app_commands.CommandTree(self)
 
         @self.tree.command(name='hello', description='Greet the user')
@@ -61,7 +62,7 @@ class DiscogClient(discord.Client):
         cmd = extract_command(message.content)
         if cmd is not None:
             logging.info('Command: %s', cmd)
-            if self.gamegen is None:
+            if self.glkstate is None:
                 update = {
                     'type':'init', 'gen':0,
                     'metrics': create_metrics(),
@@ -79,8 +80,14 @@ class DiscogClient(discord.Client):
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (outdat, errdat) = proc.communicate((cmd+'\n').encode(), timeout=2)
             ### timeout parameter?
+            ### check errdat
+
+            self.glkstate = GlkState()
+            update = json.loads(outdat)
+
+            self.glkstate.accept_update(update)
             
-            await message.channel.send('Command received: %s' % (outdat,))
+            await message.channel.send('Command received: %s' % (self.glkstate.storywindat,))
     
         
 client = DiscogClient(intents=intents)
