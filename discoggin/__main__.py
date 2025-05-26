@@ -39,8 +39,15 @@ class DiscogClient(discord.Client):
         self.glkstate = None
         self.tree = discord.app_commands.CommandTree(self)
 
-        cmd = discord.app_commands.Command(name='hello', description='Greet the user', callback=self.on_cmd_hello)
-        self.tree.add_command(cmd)
+        self.tree.add_command(discord.app_commands.Command(
+            name='start', callback=self.on_cmd_start,
+            description='Start the current game'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='stop', callback=self.on_cmd_stop,
+            description='Stop the current game (force QUIT)'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='status', callback=self.on_cmd_status,
+            description='Display the status window'))
         
     async def setup_hook(self):
         if False:
@@ -50,16 +57,40 @@ class DiscogClient(discord.Client):
     async def on_ready(self):
         logging.info('We have logged in as %s', self.user)
 
-    async def on_cmd_hello(self, interaction):
-        logging.info('slash command: hello')
-        await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+    async def on_cmd_start(self, interaction):
+        logging.info('slash command: start')
+        ### content based on interaction.channel
+        if self.glkstate is not None:
+            await interaction.response.send_message('The game is already running.')
+            return
+        await interaction.response.send_message('Game has been started.')
     
+    async def on_cmd_stop(self, interaction):
+        logging.info('slash command: stop')
+        if self.glkstate is None:
+            await interaction.response.send_message('The game is not running.')
+            return
+        self.glkstate = None
+        await interaction.response.send_message('Game has been stopped.')
+
+    async def on_cmd_status(self, interaction):
+        logging.info('slash command: status')
+        if self.glkstate is None:
+            await interaction.response.send_message('The game is not running.')
+            return
+        chan = interaction.channel
+        await interaction.response.send_message('Status line displayed.', ephemeral=True)
+        await chan.send()
+        
     async def on_message(self, message):
         if message.author == self.user:
             return
 
         cmd = extract_command(message.content)
         if cmd is not None:
+            if self.glkstate is None:
+                await message.channel.send('The game is not running. (/start to start it.)')
+                return
             logging.info('Command: %s', cmd) ###
             await self.run_turn(cmd, message.channel)
 
