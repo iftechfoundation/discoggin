@@ -39,9 +39,8 @@ class DiscogClient(discord.Client):
         self.glkstate = None
         self.tree = discord.app_commands.CommandTree(self)
 
-        @self.tree.command(name='hello', description='Greet the user')
-        async def hellofunc(interaction):
-            await self.on_cmd_hello(interaction)
+        cmd = discord.app_commands.Command(name='hello', description='Greet the user', callback=self.on_cmd_hello)
+        self.tree.add_command(cmd)
         
     async def setup_hook(self):
         if False:
