@@ -147,11 +147,7 @@ class DiscogClient(discord.Client):
                 return
             totallen = 0
             with open('games/tmp', 'wb') as outfl:
-                while True:
-                    dat = await resp.content.read(2048)
-                    if not len(dat):
-                        break
-                    print('### got', len(dat))
+                async for dat in resp.content.iter_chunked(4096):
                     totallen += len(dat)
                     outfl.write(dat)
             await chan.send('Fetched %d bytes' % (totallen,))
