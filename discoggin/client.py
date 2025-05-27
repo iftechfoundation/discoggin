@@ -19,6 +19,9 @@ class DiscogClient(discord.Client):
     def __init__(self, config, cmdsync=False):
         self.config = config
         self.cmdsync = cmdsync
+
+        self.autosavedir = config['DEFAULT']['AutoSaveDir']
+        self.gamesdir = config['DEFAULT']['GamesDir']
         
         intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
         ### members? needs additional bot priv
@@ -170,7 +173,7 @@ class DiscogClient(discord.Client):
             }
             indat = json.dumps(update)
             
-            args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', 'savedir', gamefile ]
+            args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', self.autosavedir, gamefile ]
         else:
             if cmd is None:
                 logging.warning('Tried to send no command when game was running')
@@ -183,7 +186,7 @@ class DiscogClient(discord.Client):
                 await chan.send('Unable to construct input: %s' % (ex,))
                 return
             
-            args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', 'savedir', gamefile ]
+            args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', self.autosavedir, gamefile ]
 
         try:
             proc = subprocess.Popen(
