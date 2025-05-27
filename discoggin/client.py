@@ -60,6 +60,21 @@ class DiscogClient(discord.Client):
             logging.info('syncing slash commands...')
             await self.tree.sync()
 
+    def launch_coroutine(self, coro, label='task'):
+        """Convenience function to begin an asynchronous task and report
+        any exception that occurs. This returns a task object. (You might
+        want to cancel it later.)
+        """
+        task = self.loop.create_task(coro)
+        def callback(future):
+            if future.cancelled():
+                return
+            ex = future.exception()
+            if ex is not None:
+                logging.error('%s: %s', label, ex, exc_info=ex)
+        task.add_done_callback(callback)
+        return task
+
     async def on_ready(self):
         logging.info('We have logged in as %s', self.user)
 
@@ -98,15 +113,8 @@ class DiscogClient(discord.Client):
         if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
             await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
             return
-        self.task_download = self.loop.create_task(self.download_game(url, interaction.channel))
-        def callback(future):  ###?
-            if future.cancelled():
-                return
-            ex = future.exception()
-            if ex is not None:
-                logging.error('### callback error %s', ex, exc_info=ex)
-        self.task_download.add_done_callback(callback)
-
+        
+        self.task_download = self.launch_coroutine(self.download_game(url, interaction.channel), 'download_game')
         await interaction.response.send_message('Downloading %s...' % (url,))
 
     async def on_message(self, message):
@@ -123,8 +131,10 @@ class DiscogClient(discord.Client):
 
     async def download_game(self, url, chan):
         logging.info('Downloading %s', url)
-        async with self.httpsession.get(url) as response:
-            dat = await response.read()
+        async with self.httpsession.get(url) as resp:
+            if resp.status != 200:
+                raise Exception('Download HTTP error: %s %s' % (resp.status, resp.reason,))
+            dat = await resp.read()
             await chan.send('Fetched %d bytes' % (len(dat),))
         
         await chan.send('Downloaded %s' % (url,))
