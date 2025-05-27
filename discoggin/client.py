@@ -43,6 +43,14 @@ class DiscogClient(discord.Client):
         self.httpsession = None
         self.glkstate = None  ###
 
+    async def setup_hook(self):
+        headers = { 'user-agent': 'Discoggin-IF-Terp' }
+        self.httpsession = aiohttp.ClientSession(headers=headers)
+        
+        if self.cmdsync:
+            logging.info('syncing slash commands...')
+            await self.tree.sync()
+
     async def close(self):
         logging.warning('Shutting down...')
         
@@ -52,14 +60,6 @@ class DiscogClient(discord.Client):
             
         await super().close()
         
-    async def setup_hook(self):
-        headers = { 'user-agent': 'Discoggin-IF-Terp' }
-        self.httpsession = aiohttp.ClientSession(headers=headers)
-        
-        if self.cmdsync:
-            logging.info('syncing slash commands...')
-            await self.tree.sync()
-
     def launch_coroutine(self, coro, label='task'):
         """Convenience function to begin an asynchronous task and report
         any exception that occurs. This returns a task object. (You might
