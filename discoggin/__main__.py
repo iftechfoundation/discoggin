@@ -1,20 +1,20 @@
 import sys
 import logging, logging.handlers
-import optparse
+import argparse
 import configparser
 
 from .client import DiscogClient
 
-popt = optparse.OptionParser(usage='python -m discoggin')
+popt = argparse.ArgumentParser(prog='python -m discoggin')
 
-popt.add_option('--cmdsync',
-                action='store_true', dest='cmdsync',
-                help='upload slash commands to Discord')
-popt.add_option('--logstream',
-                action='store_true', dest='logstream',
-                help='log to stdout rather than the configured file')
+popt.add_argument('--cmdsync',
+                  action='store_true', dest='cmdsync',
+                  help='upload slash commands to Discord')
+popt.add_argument('--logstream',
+                  action='store_true', dest='logstream',
+                  help='log to stdout rather than the configured file')
 
-(opts, args) = popt.parse_args()
+args = popt.parse_args()
 
 config = configparser.ConfigParser()
 config.read('app.config')
@@ -22,7 +22,7 @@ config.read('app.config')
 bottoken = config['DEFAULT']['BotToken']
 logfilepath = config['DEFAULT']['LogFile']
 
-if opts.logstream:
+if args.logstream:
     loghandler = logging.StreamHandler(sys.stdout)
 else:
     loghandler = logging.handlers.WatchedFileHandler(logfilepath)
@@ -33,7 +33,7 @@ rootlogger = logging.getLogger()
 rootlogger.addHandler(loghandler)
 rootlogger.setLevel(logging.INFO)
         
-client = DiscogClient(config, cmdsync=opts.cmdsync)
+client = DiscogClient(config, cmdsync=args.cmdsync)
 
-client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
+#client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
