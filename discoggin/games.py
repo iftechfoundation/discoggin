@@ -21,11 +21,9 @@ async def download_game(app, url, chan):
         await chan.send('URL does not appear to be a file.')
         return
 
-
     download_nonce += 1
     tmpfile = '_tmp_%d_%d_%s' % (time.time(), download_nonce, filename,)
     tmppath = os.path.join(app.gamesdir, tmpfile)
-    logging.info('### tmppath %s', tmppath)
     
     async with app.httpsession.get(url) as resp:
         if resp.status != 200:
@@ -51,12 +49,18 @@ async def download_game(app, url, chan):
         os.remove(tmppath)
         return
 
-    format = detect_format(tmppath)
+    format = detect_format(tmppath, filename)
     if not format:
         await chan.send('Format not recognized!')
         os.remove(tmppath)
         return
 
-def detect_format(path):
-    ###
-    return 'zcode'
+def detect_format(path, filename):
+    _, ext = os.path.splitext(filename)
+    ext = ext.lower()
+
+    if ext in ('.ulx', '.gblorb'):
+        return 'glulx'
+    if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
+        return 'zcode'
+    return None

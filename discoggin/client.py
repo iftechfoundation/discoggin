@@ -124,6 +124,7 @@ class DiscogClient(discord.Client):
         if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
             await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
             return
+        ### reject .zip here too?
 
         if self.task_download:
             await interaction.response.send_message('Already downloading a game; please wait a moment and try again.', ephemeral=True)
