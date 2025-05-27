@@ -40,9 +40,7 @@ class DiscogClient(discord.Client):
             name='download', callback=self.on_cmd_download,
             description='Download an IF game file for play'))
 
-        headers = { 'user-agent': 'Discoggin-IF-Terp' }
-        self.httpsession = aiohttp.ClientSession(headers=headers)
-        
+        self.httpsession = None
         self.glkstate = None  ###
 
     async def close(self):
@@ -55,6 +53,9 @@ class DiscogClient(discord.Client):
         await super().close()
         
     async def setup_hook(self):
+        headers = { 'user-agent': 'Discoggin-IF-Terp' }
+        self.httpsession = aiohttp.ClientSession(headers=headers)
+        
         if self.cmdsync:
             logging.info('syncing slash commands...')
             await self.tree.sync()
@@ -98,12 +99,12 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
             return
         self.task_download = self.loop.create_task(self.download_game(url, interaction.channel))
-        def callback(future):
+        def callback(future):  ###?
             if future.cancelled():
                 return
             ex = future.exception()
             if ex is not None:
-                logging.error('### callback error %s', ex)
+                logging.error('### callback error %s', ex, exc_info=ex)
         self.task_download.add_done_callback(callback)
 
         await interaction.response.send_message('Downloading %s...' % (url,))
@@ -122,13 +123,9 @@ class DiscogClient(discord.Client):
 
     async def download_game(self, url, chan):
         logging.info('Downloading %s', url)
-        try:
-            async with self.httpsession.get(url) as response:
-                dat = await response.read()
-                await chan.send('Fetched %d bytes' % (len(dat),))
-        except Exception as ex:
-            await chan.send('### exception %s' % (ex,))
-            return
+        async with self.httpsession.get(url) as response:
+            dat = await response.read()
+            await chan.send('Fetched %d bytes' % (len(dat),))
         
         await chan.send('Downloaded %s' % (url,))
 
