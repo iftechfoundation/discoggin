@@ -150,9 +150,8 @@ class DiscogClient(discord.Client):
                 async for dat in resp.content.iter_chunked(4096):
                     totallen += len(dat)
                     outfl.write(dat)
-            await chan.send('Fetched %d bytes' % (totallen,))
         
-        await chan.send('Downloaded %s' % (url,))
+        await chan.send('Downloaded %s (%d bytes)' % (url, totallen,))
 
     async def run_turn(self, cmd, chan):
         if not chan:
