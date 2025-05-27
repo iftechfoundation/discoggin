@@ -4,8 +4,10 @@ import argparse
 import configparser
 
 from .client import DiscogClient
+from .clifunc import cmd_createdb
 
 popt = argparse.ArgumentParser(prog='python -m discoggin')
+subopt = popt.add_subparsers(dest='cmd', title='commands')
 
 popt.add_argument('--cmdsync',
                   action='store_true', dest='cmdsync',
@@ -13,6 +15,9 @@ popt.add_argument('--cmdsync',
 popt.add_argument('--logstream',
                   action='store_true', dest='logstream',
                   help='log to stdout rather than the configured file')
+
+pcmd = subopt.add_parser('createdb', help='create database tables')
+pcmd.set_defaults(cmdfunc=cmd_createdb)
 
 args = popt.parse_args()
 
@@ -35,5 +40,8 @@ rootlogger.setLevel(logging.INFO)
         
 client = DiscogClient(config, cmdsync=args.cmdsync)
 
-#client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
+if args.cmd:
+    args.cmdfunc(args, client)
+else:
+    client.run(bottoken, log_handler=loghandler, log_formatter=logformatter)
 
