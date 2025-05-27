@@ -41,7 +41,7 @@ class DiscogClient(discord.Client):
             description='Download an IF game file for play'))
 
         self.httpsession = None
-        self.task_download = None ### allow multiple?
+        self.task_download = None  ### use a set()? 
         self.glkstate = None  ###
 
     async def setup_hook(self):
@@ -118,7 +118,8 @@ class DiscogClient(discord.Client):
         if self.task_download:
             await interaction.response.send_message('Already downloading a game; please wait a moment and try again.', ephemeral=True)
             return
-            
+
+        ### maybe this should all happen within the cmd
         self.task_download = self.launch_coroutine(self.download_game(url, interaction.channel), 'download_game')
         def callback(future):
             self.task_download = None
@@ -142,9 +143,18 @@ class DiscogClient(discord.Client):
         logging.info('Downloading %s', url)
         async with self.httpsession.get(url) as resp:
             if resp.status != 200:
-                raise Exception('Download HTTP error: %s %s' % (resp.status, resp.reason,))
-            dat = await resp.read()
-            await chan.send('Fetched %d bytes' % (len(dat),))
+                await chan.send('Download HTTP error: %s %s: %s' % (resp.status, resp.reason, url))
+                return
+            totallen = 0
+            with open('games/tmp', 'wb') as outfl:
+                while True:
+                    dat = await resp.content.read(2048)
+                    if not len(dat):
+                        break
+                    print('### got', len(dat))
+                    totallen += len(dat)
+                    outfl.write(dat)
+            await chan.send('Fetched %d bytes' % (totallen,))
         
         await chan.send('Downloaded %s' % (url,))
 
