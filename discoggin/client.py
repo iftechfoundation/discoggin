@@ -1,6 +1,7 @@
 import json
 import subprocess
 import logging
+import asyncio
 import aiohttp
 
 import discord
@@ -39,8 +40,19 @@ class DiscogClient(discord.Client):
             name='download', callback=self.on_cmd_download,
             description='Download an IF game file for play'))
 
-        self.httpsession = aiohttp.ClientSession()
+        headers = { 'user-agent': 'Discoggin-IF-Terp' }
+        self.httpsession = aiohttp.ClientSession(headers=headers)
+        
         self.glkstate = None  ###
+
+    async def close(self):
+        logging.warning('Shutting down...')
+        
+        if self.httpsession:
+            await self.httpsession.close()
+            self.httpsession = None
+            
+        await super().close()
         
     async def setup_hook(self):
         if self.cmdsync:
@@ -85,13 +97,17 @@ class DiscogClient(discord.Client):
         if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
             await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
             return
+        self.task_download = self.loop.create_task(self.download_game(url, interaction.channel))
+        def callback(future):
+            if future.cancelled():
+                return
+            ex = future.exception()
+            if ex is not None:
+                logging.error('### callback error %s', ex)
+        self.task_download.add_done_callback(callback)
+
         await interaction.response.send_message('Downloading %s...' % (url,))
 
-        headers = { 'User-Agent': 'Discoggin-IF-Terp' }
-        async with self.httpsession.get(url, headers=headers) as response:
-            dat = await response.read()
-            interaction.channel.send('Fetched %d bytes' % (len(dat),))
-        
     async def on_message(self, message):
         if message.author == self.user:
             return
@@ -103,6 +119,18 @@ class DiscogClient(discord.Client):
                 return
             logging.info('Command: %s', cmd) ###
             await self.run_turn(cmd, message.channel)
+
+    async def download_game(self, url, chan):
+        logging.info('Downloading %s', url)
+        try:
+            async with self.httpsession.get(url) as response:
+                dat = await response.read()
+                await chan.send('Fetched %d bytes' % (len(dat),))
+        except Exception as ex:
+            await chan.send('### exception %s' % (ex,))
+            return
+        
+        await chan.send('Downloaded %s' % (url,))
 
     async def run_turn(self, cmd, chan):
         if not chan:
