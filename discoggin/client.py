@@ -143,7 +143,7 @@ class DiscogClient(discord.Client):
 
     async def on_cmd_gamelist(self, interaction):
         gamels = get_gamelist(self)
-        ls = []
+        ls = [ 'Downloaded games available for play: (**/select** one)' ]
         for game in gamels:
             ls.append('- %s (%s)' % (game.filename, game.format,))
         val = '\n'.join(ls)
@@ -157,7 +157,7 @@ class DiscogClient(discord.Client):
         cmd = extract_command(message.content)
         if cmd is not None:
             if self.glkstate is None:
-                await message.channel.send('The game is not running. (/start to start it.)')
+                await message.channel.send('The game is not running. (**/start** to start it.)')
                 return
             logging.info('Command: %s', cmd) ###
             await self.run_turn(cmd, message.channel)
