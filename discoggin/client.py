@@ -11,7 +11,7 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
-from .games import download_game
+from .games import download_game_url, get_gamelist
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -45,6 +45,9 @@ class DiscogClient(discord.Client):
         self.tree.add_command(discord.app_commands.Command(
             name='download', callback=self.on_cmd_download,
             description='Download an IF game file for play'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='games', callback=self.on_cmd_gamelist,
+            description='List downloaded games'))
 
         self.httpsession = None
         self.task_download = None  ### use a set()? 
@@ -131,13 +134,22 @@ class DiscogClient(discord.Client):
             return
 
         ### maybe this should all happen within the cmd
-        self.task_download = self.launch_coroutine(download_game(self, url, interaction.channel), 'download_game')
+        self.task_download = self.launch_coroutine(download_game_url(self, url, interaction.channel), 'download_game')
         def callback(future):
             self.task_download = None
         self.task_download.add_done_callback(callback)
         
         await interaction.response.send_message('Downloading %s...' % (url,))
 
+    async def on_cmd_gamelist(self, interaction):
+        gamels = get_gamelist(self)
+        ls = []
+        for game in gamels:
+            ls.append('- %s (%s)' % (game.filename, game.format,))
+        val = '\n'.join(ls)
+        ### is there a size limit here?
+        await interaction.response.send_message(val)
+                
     async def on_message(self, message):
         if message.author == self.user:
             return

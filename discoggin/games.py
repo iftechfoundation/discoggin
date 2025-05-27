@@ -5,12 +5,28 @@ import time
 import logging
 import hashlib
 
+class GameFile:
+    def __init__(self, hash, filename, url, format):
+        self.hash = hash
+        self.filename = filename
+        self.url = url
+        self.format = format
+
+    def __repr__(self):
+        return '<GameFile "%s" (%s) %s>' % (self.filenane, self.format, self.hash,)
+
+def get_gamelist(app):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM games')
+    gamels = [ GameFile(*tup) for tup in res.fetchall() ]
+    return gamels
+    
 # Matches empty string, ".", "..", and so on.
 pat_alldots = re.compile('^[.]*$')
 
 download_nonce = 1
 
-async def download_game(app, url, chan):
+async def download_game_url(app, url, chan):
     global download_nonce
     
     logging.info('Downloading %s', url)
@@ -54,6 +70,8 @@ async def download_game(app, url, chan):
         await chan.send('Format not recognized!')
         os.remove(tmppath)
         return
+
+    ### this would be a great place to pull ifiction from blorbs
 
     finaldir = os.path.join(app.gamesdir, hash)
     finalpath = os.path.join(app.gamesdir, hash, filename)
