@@ -26,16 +26,20 @@ pat_alldots = re.compile('^[.]*$')
 
 download_nonce = 1
 
-async def download_game_url(app, url, chan):
+async def download_game_url(app, url):
     global download_nonce
     
-    logging.info('Downloading %s', url)
+    logging.info('Requested download: %s', url)
 
+    if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
+        return 'Download URL must start with `http://` or `https://`'
+
+    ### reject .zip here too?
+    
     _, _, filename = url.rpartition('/')
     filename = urllib.parse.unquote(filename)
     if pat_alldots.match(filename) or '/' in filename:
-        await chan.send('URL does not appear to be a file.')
-        return
+        return 'URL does not appear to be a file: %s' % (url,)
 
     download_nonce += 1
     tmpfile = '_tmp_%d_%d_%s' % (time.time(), download_nonce, filename,)
@@ -43,8 +47,8 @@ async def download_game_url(app, url, chan):
     
     async with app.httpsession.get(url) as resp:
         if resp.status != 200:
-            await chan.send('Download HTTP error: %s %s: %s' % (resp.status, resp.reason, url))
-            return
+            return 'Download error: %s %s: %s' % (resp.status, resp.reason, url,)
+        
         totallen = 0
         md5 = hashlib.md5()
         with open(tmppath, 'wb') as outfl:
@@ -55,21 +59,17 @@ async def download_game_url(app, url, chan):
             dat = None
             hash = md5.hexdigest()
 
-    await chan.send('Downloaded %s (%d bytes)' % (url, totallen,))
-
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM games WHERE hash = ?', (hash,))
     tup = res.fetchone()
     if tup:
-        await chan.send('Game is already installed!')
         os.remove(tmppath)
-        return
+        return 'Game is already installed: %s' % (url,)
 
     format = detect_format(tmppath, filename)
     if not format:
-        await chan.send('Format not recognized!')
         os.remove(tmppath)
-        return
+        return 'Format not recognized: %s' % (url,)
 
     ### this would be a great place to pull ifiction from blorbs
 
@@ -82,6 +82,8 @@ async def download_game_url(app, url, chan):
     if not os.path.exists(finaldir):
         os.mkdir(finaldir)
     os.rename(tmppath, finalpath)
+
+    return 'Downloaded: %s\n(**/select %s** to begin playing)' % (url, filename,)
 
 def detect_format(path, filename):
     _, ext = os.path.splitext(filename)

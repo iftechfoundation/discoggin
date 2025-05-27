@@ -50,7 +50,6 @@ class DiscogClient(discord.Client):
             description='List downloaded games'))
 
         self.httpsession = None
-        self.task_download = None  ### use a set()? 
         self.glkstate = None  ###
 
         self.db = sqlite3.connect(self.dbfile)
@@ -123,23 +122,12 @@ class DiscogClient(discord.Client):
                 await chan.send('|\n'+out)
 
     async def on_cmd_download(self, interaction, url:str):
-        logging.info('slash command: download: %s', url)
-        if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
-            await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
-            return
-        ### reject .zip here too?
-
-        if self.task_download:
-            await interaction.response.send_message('Already downloading a game; please wait a moment and try again.', ephemeral=True)
-            return
-
-        ### maybe this should all happen within the cmd
-        self.task_download = self.launch_coroutine(download_game_url(self, url, interaction.channel), 'download_game')
-        def callback(future):
-            self.task_download = None
-        self.task_download.add_done_callback(callback)
-        
-        await interaction.response.send_message('Downloading %s...' % (url,))
+        try:
+            msg = await download_game_url(self, url)
+            await interaction.response.send_message(msg)
+        except Exception as ex:
+            logging.error('Download: %s', ex, exc_info=ex)
+            await interaction.response.send_message('Download error: %s' % (ex,))
 
     async def on_cmd_gamelist(self, interaction):
         gamels = get_gamelist(self)
@@ -147,7 +135,7 @@ class DiscogClient(discord.Client):
         for game in gamels:
             ls.append('- %s (%s)' % (game.filename, game.format,))
         val = '\n'.join(ls)
-        ### is there a size limit here?
+        ### is there a message size limit here?
         await interaction.response.send_message(val)
                 
     async def on_message(self, message):
