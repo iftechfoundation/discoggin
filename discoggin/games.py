@@ -55,6 +55,16 @@ async def download_game(app, url, chan):
         os.remove(tmppath)
         return
 
+    finaldir = os.path.join(app.gamesdir, hash)
+    finalpath = os.path.join(app.gamesdir, hash, filename)
+
+    tup = (hash, filename, url, format)
+    curs.execute('INSERT INTO games (hash, filename, url, format) VALUES (?, ?, ?, ?)', tup)
+
+    if not os.path.exists(finaldir):
+        os.mkdir(finaldir)
+    os.rename(tmppath, finalpath)
+
 def detect_format(path, filename):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()
