@@ -11,6 +11,7 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
+from .games import download_game
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -129,7 +130,7 @@ class DiscogClient(discord.Client):
             return
 
         ### maybe this should all happen within the cmd
-        self.task_download = self.launch_coroutine(self.download_game(url, interaction.channel), 'download_game')
+        self.task_download = self.launch_coroutine(download_game(self, url, interaction.channel), 'download_game')
         def callback(future):
             self.task_download = None
         self.task_download.add_done_callback(callback)
@@ -147,20 +148,6 @@ class DiscogClient(discord.Client):
                 return
             logging.info('Command: %s', cmd) ###
             await self.run_turn(cmd, message.channel)
-
-    async def download_game(self, url, chan):
-        logging.info('Downloading %s', url)
-        async with self.httpsession.get(url) as resp:
-            if resp.status != 200:
-                await chan.send('Download HTTP error: %s %s: %s' % (resp.status, resp.reason, url))
-                return
-            totallen = 0
-            with open('games/tmp', 'wb') as outfl:
-                async for dat in resp.content.iter_chunked(4096):
-                    totallen += len(dat)
-                    outfl.write(dat)
-        
-        await chan.send('Downloaded %s (%d bytes)' % (url, totallen,))
 
     async def run_turn(self, cmd, chan):
         if not chan:
