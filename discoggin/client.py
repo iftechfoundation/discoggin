@@ -1,6 +1,7 @@
 import json
 import subprocess
 import logging
+import aiohttp
 
 import discord
 import discord.app_commands
@@ -34,7 +35,11 @@ class DiscogClient(discord.Client):
         self.tree.add_command(discord.app_commands.Command(
             name='status', callback=self.on_cmd_status,
             description='Display the status window'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='download', callback=self.on_cmd_download,
+            description='Download an IF game file for play'))
 
+        self.httpsession = aiohttp.ClientSession()
         self.glkstate = None  ###
         
     async def setup_hook(self):
@@ -74,6 +79,18 @@ class DiscogClient(discord.Client):
         for out in outls:
             if out.strip():
                 await chan.send('|\n'+out)
+
+    async def on_cmd_download(self, interaction, url:str):
+        logging.info('slash command: download: %s', url)
+        if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
+            await interaction.response.send_message('Download URL must start with `http://` or `https://`.', ephemeral=True)
+            return
+        await interaction.response.send_message('Downloading %s...' % (url,))
+
+        headers = { 'User-Agent': 'Discoggin-IF-Terp' }
+        async with self.httpsession.get(url, headers=headers) as response:
+            dat = await response.read()
+            interaction.channel.send('Fetched %d bytes' % (len(dat),))
         
     async def on_message(self, message):
         if message.author == self.user:
