@@ -1,6 +1,7 @@
 import json
 import subprocess
 import logging
+import sqlite3
 import asyncio
 import aiohttp
 
@@ -22,6 +23,7 @@ class DiscogClient(discord.Client):
 
         self.autosavedir = config['DEFAULT']['AutoSaveDir']
         self.gamesdir = config['DEFAULT']['GamesDir']
+        self.dbfile = config['DEFAULT']['DBFile']
         
         intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
         ### members? needs additional bot priv
@@ -46,6 +48,10 @@ class DiscogClient(discord.Client):
         self.httpsession = None
         self.task_download = None  ### use a set()? 
         self.glkstate = None  ###
+
+        self.db = sqlite3.connect(self.dbfile)
+        self.db.isolation_level = None   # autocommit
+
 
     async def setup_hook(self):
         headers = { 'user-agent': 'Discoggin-IF-Terp' }
