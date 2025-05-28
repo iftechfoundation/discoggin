@@ -60,7 +60,7 @@ class DiscogClient(discord.Client):
         self.httpsession = aiohttp.ClientSession(headers=headers)
         
         if self.cmdsync:
-            logging.info('syncing %d slash commands...', len(_appcmds))
+            logging.info('Syncing %d slash commands...', len(_appcmds))
             await self.tree.sync()
 
     async def close(self):
@@ -88,11 +88,10 @@ class DiscogClient(discord.Client):
         return task
 
     async def on_ready(self):
-        logging.info('We have logged in as %s', self.user)
+        logging.info('Logged in as %s', self.user)
 
     @appcmd('start', description='Start the current game')
     async def on_cmd_start(self, interaction):
-        logging.info('slash command: start')
         ### content based on interaction.channel
         if self.glkstate is not None:
             await interaction.response.send_message('The game is already running.')
@@ -102,7 +101,6 @@ class DiscogClient(discord.Client):
     
     @appcmd('stop', description='Stop the current game (force QUIT)')
     async def on_cmd_stop(self, interaction):
-        logging.info('slash command: stop')
         if self.glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
@@ -111,7 +109,6 @@ class DiscogClient(discord.Client):
 
     @appcmd('status', description='Display the status window')
     async def on_cmd_status(self, interaction):
-        logging.info('slash command: status')
         if self.glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
@@ -123,11 +120,12 @@ class DiscogClient(discord.Client):
             if out.strip():
                 await chan.send('|\n'+out)
 
-    @appcmd('download', description='Download an game file for play')
+    @appcmd('download', description='Download a game file for play')
     async def on_cmd_download(self, interaction, url:str):
         try:
             msg = await download_game_url(self, url)
             await interaction.response.send_message(msg)
+            ### also select it, if we're in a game channel?
         except Exception as ex:
             logging.error('Download: %s', ex, exc_info=ex)
             await interaction.response.send_message('Download error: %s' % (ex,))

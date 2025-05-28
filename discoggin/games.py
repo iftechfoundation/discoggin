@@ -109,6 +109,7 @@ async def download_game_url(app, url):
         return 'Format not recognized: %s' % (url,)
 
     ### this would be a great place to pull ifiction from blorbs
+    logging.info('Downloaded %s (hash %s, format %s)', url, hash, format)
 
     finaldir = os.path.join(app.gamesdir, hash)
     finalpath = os.path.join(app.gamesdir, hash, filename)
