@@ -43,6 +43,12 @@ def create_session(app, game):
     curs.execute('INSERT INTO sessions (sessid, hash, lastupdate) VALUES (?, ?, ?)', tup)
     return Session(*tup)
 
+def get_playchannels(app):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM channels')
+    chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
+    return chanls
+
 def get_valid_playchannel(app, interaction):
     gid = interaction.guild_id
     if not gid:

@@ -13,7 +13,8 @@ from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
 from .games import get_gamelist, get_gamemap, get_game_by_name
 from .games import download_game_url
-from .sessions import get_sessions, get_valid_playchannel, create_session, set_channel_session
+from .sessions import get_sessions, create_session, set_channel_session
+from .sessions import get_playchannels, get_valid_playchannel
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -152,11 +153,18 @@ class DiscogClient(discord.Client):
             return
         sessls.sort(key=lambda sess: sess.lastupdate)
         gamemap = get_gamemap(self)
+        chanls = get_playchannels(self)
+        chanmap = {}
+        for playchan in chanls:
+            if playchan.sessid:
+                chanmap[playchan.sessid] = playchan
         ls = []
         for sess in sessls:
             game = gamemap.get(sess.hash)
             gamestr = game.filename if game else '???'
-            ls.append('- session %s: %s <t:%s:f>' % (sess.sessid, gamestr, sess.lastupdate,))
+            playchan = chanmap.get(sess.sessid)
+            chanstr = ' (%s)' % (playchan,) if playchan else ''
+            ls.append('- session %s: %s%s <t:%s:f>' % (sess.sessid, gamestr, chanstr, sess.lastupdate,))
         val = '\n'.join(ls)
         ### is there a message size limit here?
         await interaction.response.send_message(val)
