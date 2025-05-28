@@ -13,7 +13,7 @@ class GameFile:
         self.format = format
 
     def __repr__(self):
-        return '<GameFile "%s" (%s) %s>' % (self.filenane, self.format, self.hash,)
+        return '<GameFile "%s" (%s) %s>' % (self.filename, self.format, self.hash,)
 
 def get_gamelist(app):
     curs = app.db.cursor()
