@@ -152,7 +152,6 @@ class DiscogClient(discord.Client):
             return
         sessls.sort(key=lambda sess: sess.lastupdate)
         gamemap = get_gamemap(self)
-        print('###', sessls)
         ls = []
         for sess in sessls:
             game = gamemap.get(sess.hash)
