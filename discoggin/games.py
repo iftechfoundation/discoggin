@@ -20,7 +20,14 @@ def get_gamelist(app):
     res = curs.execute('SELECT * FROM games')
     gamels = [ GameFile(*tup) for tup in res.fetchall() ]
     return gamels
-    
+
+def get_gamemap(app):
+    ls = get_gamelist(app)
+    res = {}
+    for game in ls:
+        res[game.hash] = game
+    return res
+
 # Matches empty string, ".", "..", and so on.
 pat_alldots = re.compile('^[.]*$')
 

@@ -11,7 +11,8 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
-from .games import download_game_url, get_gamelist
+from .games import download_game_url, get_gamelist, get_gamemap
+from .sessions import get_sessions
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -48,6 +49,9 @@ class DiscogClient(discord.Client):
         self.tree.add_command(discord.app_commands.Command(
             name='games', callback=self.on_cmd_gamelist,
             description='List downloaded games'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='sessions', callback=self.on_cmd_sessionlist,
+            description='List game sessions'))
 
         self.httpsession = None
         self.glkstate = None  ###
@@ -131,9 +135,28 @@ class DiscogClient(discord.Client):
 
     async def on_cmd_gamelist(self, interaction):
         gamels = get_gamelist(self)
+        if not gamels:
+            await interaction.response.send_message('No games downloaded')
+            return
         ls = [ 'Downloaded games available for play: (**/select** one)' ]
         for game in gamels:
             ls.append('- %s (%s)' % (game.filename, game.format,))
+        val = '\n'.join(ls)
+        ### is there a message size limit here?
+        await interaction.response.send_message(val)
+                
+    async def on_cmd_sessionlist(self, interaction):
+        sessls = get_sessions(self)
+        if not sessls:
+            await interaction.response.send_message('No game sessions in progress')
+            return
+        sessls.sort(key=lambda sess: sess.lastupdate)
+        gamemap = get_gamemap(self)
+        print('###', sessls)
+        ls = []
+        for sess in sessls:
+            game = gamemap.get(sess.hash)
+            ls.append('- %s: <t:%s:f>' % (sess.sessid, sess.lastupdate,))
         val = '\n'.join(ls)
         ### is there a message size limit here?
         await interaction.response.send_message(val)
