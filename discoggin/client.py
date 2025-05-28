@@ -58,7 +58,7 @@ class DiscogClient(discord.Client):
         self.httpsession = aiohttp.ClientSession(headers=headers)
         
         if self.cmdsync:
-            logging.info('syncing slash commands...')
+            logging.info('syncing %d slash commands...', len(_appcmds))
             await self.tree.sync()
 
     async def close(self):
