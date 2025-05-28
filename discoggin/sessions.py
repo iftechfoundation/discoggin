@@ -31,6 +31,18 @@ def get_sessions(app):
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     return sessls
     
+def create_session(app, game):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT sessid FROM sessions')
+    idlist = [ tup[0] for tup in res.fetchall() ]
+    if not idlist:
+        sessid = 1
+    else:
+        sessid = 1 + max(idlist)
+    tup = (sessid, game.hash, int(time.time()))
+    curs.execute('INSERT INTO sessions (sessid, hash, lastupdate) VALUES (?, ?, ?)', tup)
+    return Session(*tup)
+
 def get_valid_playchannel(app, interaction):
     gid = interaction.guild_id
     if not gid:
@@ -48,4 +60,8 @@ def get_valid_playchannel(app, interaction):
     if not tup:
         return None
     return PlayChannel(*tup)
+
+def set_channel_session(app, playchan, session):
+    curs = app.db.cursor()
+    curs.execute('UPDATE channels SET sessid = ? WHERE gckey = ?', (session.sessid, playchan.gckey,))
 
