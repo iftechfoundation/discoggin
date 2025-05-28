@@ -4,7 +4,7 @@ import argparse
 import configparser
 
 from .client import DiscogClient
-from .clifunc import cmd_createdb
+from .clifunc import cmd_createdb, cmd_addchannel
 
 popt = argparse.ArgumentParser(prog='python -m discoggin')
 subopt = popt.add_subparsers(dest='cmd', title='commands')
@@ -18,6 +18,10 @@ popt.add_argument('--logstream',
 
 pcmd = subopt.add_parser('createdb', help='create database tables')
 pcmd.set_defaults(cmdfunc=cmd_createdb)
+
+pcmd = subopt.add_parser('addchannel', help='add a playing channel')
+pcmd.add_argument('channelurl')
+pcmd.set_defaults(cmdfunc=cmd_addchannel)
 
 args = popt.parse_args()
 
