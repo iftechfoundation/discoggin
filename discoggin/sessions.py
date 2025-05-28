@@ -45,7 +45,21 @@ def get_session_by_id(app, sessid):
     return Session(*tup)
 
 def get_available_session_for_hash(app, hash):
-    pass ###
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM sessions WHERE hash = ?', (hash,))
+    sessls = [ Session(*tup) for tup in res.fetchall() ]
+    
+    chanls = get_playchannels(app)
+    chanmap = {}
+    for playchan in chanls:
+        if playchan.sessid:
+            chanmap[playchan.sessid] = playchan
+
+    availls = [ sess for sess in sessls if sess.sessid not in chanmap ]
+    if not availls:
+        return None
+    availls.sort(key=lambda sess: sess.lastupdate)
+    return availls[0]
 
 def create_session(app, game):
     curs = app.db.cursor()

@@ -207,17 +207,18 @@ class DiscogClient(discord.Client):
             if not game:
                 await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
                 return
-            await interaction.response.send_message('Activated session for "%s"' % (game.filename,))
+            await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
             return
             
         game = get_game_by_name(self, gamearg)
         if not game:
             await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
             return
+        ### if already on this game...
         session = get_available_session_for_hash(self, game.hash)
         if session:
             set_channel_session(self, playchan, session)
-            await interaction.response.send_message('Activated session for "%s"' % (game.filename,))
+            await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
             return
         session = create_session(self, game)
         set_channel_session(self, playchan, session)
