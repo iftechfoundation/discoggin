@@ -1,16 +1,17 @@
 import time
 
 class Session:
-    def __init__(self, sessid, hash, lastupdate=None):
+    def __init__(self, sessid, hash, movecount=0, lastupdate=None):
         if lastupdate is None:
             lastupdate = int(time.time())
         self.sessid = sessid
         self.hash = hash
+        self.movecount = movecount
         self.lastupdate = lastupdate
 
     def __repr__(self):
         timestr = time.ctime(self.lastupdate)
-        return '<Session %s (%s): %s>' % (self.sessid, self.hash, timestr,)
+        return '<Session %s (%s): %d moves, %s>' % (self.sessid, self.hash, self.movecount, timestr,)
 
 class PlayChannel:
     def __init__(self, gckey, gid, chanid, sessid=None):
@@ -39,8 +40,8 @@ def create_session(app, game):
         sessid = 1
     else:
         sessid = 1 + max(idlist)
-    tup = (sessid, game.hash, int(time.time()))
-    curs.execute('INSERT INTO sessions (sessid, hash, lastupdate) VALUES (?, ?, ?)', tup)
+    tup = (sessid, game.hash, 0, int(time.time()))
+    curs.execute('INSERT INTO sessions (sessid, hash, movecount, lastupdate) VALUES (?, ?, ?, ?)', tup)
     return Session(*tup)
 
 def get_playchannels(app):

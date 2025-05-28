@@ -15,7 +15,7 @@ def cmd_createdb(args, app):
         print('"sessions" table exists')
     else:
         print('creating "sessions" table...')
-        curs.execute('CREATE TABLE sessions(sessid unique, hash, lastupdate)')
+        curs.execute('CREATE TABLE sessions(sessid unique, hash, movecount, lastupdate)')
 
     if 'channels' in tables:
         print('"channels" table exists')
