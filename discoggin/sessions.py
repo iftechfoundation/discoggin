@@ -43,7 +43,10 @@ def get_session_by_id(app, sessid):
     if not tup:
         return None
     return Session(*tup)
-    
+
+def get_available_session_for_hash(app, hash):
+    pass ###
+
 def create_session(app, game):
     curs = app.db.cursor()
     res = curs.execute('SELECT sessid FROM sessions')

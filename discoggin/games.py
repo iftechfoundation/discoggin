@@ -28,6 +28,14 @@ def get_gamemap(app):
         res[game.hash] = game
     return res
 
+def get_game_by_hash(app, hash):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM games WHERE hash = ?', (hash,))
+    tup = res.fetchone()
+    if not tup:
+        return None
+    return GameFile(*tup)
+
 def get_game_by_name(app, val):
     val = val.lower()
     ls = get_gamelist(app)

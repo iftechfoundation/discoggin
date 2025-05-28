@@ -11,9 +11,9 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
-from .games import get_gamelist, get_gamemap, get_game_by_name
+from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash
 from .games import download_game_url
-from .sessions import get_sessions, get_session_by_id, create_session, set_channel_session
+from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
 from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
 
 ###
@@ -186,7 +186,7 @@ class DiscogClient(discord.Client):
         set_channel_session(self, playchan, session)
         await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
         
-    @appcmd('select', description='Select a game to play in this channel')
+    @appcmd('select', description='Select a game or session to play in this channel')
     async def on_cmd_select(self, interaction, game:str):
         gamearg = game
         playchan = get_valid_playchannel(self, interaction=interaction)
@@ -203,10 +203,25 @@ class DiscogClient(discord.Client):
                     await interaction.response.send_message('Session %d is already being used in channel <#%s>.' % (session.sessid, prevchan.chanid,))
                 return
             set_channel_session(self, playchan, session)
+            game = get_game_by_hash(self, session.hash)
+            if not game:
+                await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
+                return
             await interaction.response.send_message('Activated session for "%s"' % (game.filename,))
             return
             
-        await interaction.response.send_message('### select ' + game)
+        game = get_game_by_name(self, gamearg)
+        if not game:
+            await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
+            return
+        session = get_available_session_for_hash(self, game.hash)
+        if session:
+            set_channel_session(self, playchan, session)
+            await interaction.response.send_message('Activated session for "%s"' % (game.filename,))
+            return
+        session = create_session(self, game)
+        set_channel_session(self, playchan, session)
+        await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
         
     async def on_message(self, message):
         if message.author == self.user:
