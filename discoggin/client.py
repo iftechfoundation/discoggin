@@ -11,8 +11,9 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
-from .games import download_game_url, get_gamelist, get_gamemap
-from .sessions import get_sessions
+from .games import get_gamelist, get_gamemap, get_game_by_name
+from .games import download_game_url
+from .sessions import get_sessions, get_valid_playchannel
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -162,7 +163,16 @@ class DiscogClient(discord.Client):
                 
     @appcmd('newsession', description='Start a new game session in this channel')
     async def on_cmd_newsession(self, interaction, game:str):
-        await interaction.response.send_message('### newsession ' + game)
+        gamearg = game
+        playchan = get_valid_playchannel(self, interaction=interaction)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        game = get_game_by_name(self, gamearg)
+        if not game:
+            await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
+            return
+        await interaction.response.send_message('### ready for %s in %s' % (game, playchan))
         
     @appcmd('select', description='Select a game to play in this channel')
     async def on_cmd_select(self, interaction, game:str):
