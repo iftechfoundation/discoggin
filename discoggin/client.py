@@ -13,8 +13,8 @@ from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
 from .games import get_gamelist, get_gamemap, get_game_by_name
 from .games import download_game_url
-from .sessions import get_sessions, create_session, set_channel_session
-from .sessions import get_playchannels, get_valid_playchannel
+from .sessions import get_sessions, get_session_by_id, create_session, set_channel_session
+from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
 
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
@@ -188,6 +188,24 @@ class DiscogClient(discord.Client):
         
     @appcmd('select', description='Select a game to play in this channel')
     async def on_cmd_select(self, interaction, game:str):
+        gamearg = game
+        playchan = get_valid_playchannel(self, interaction=interaction)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        session = get_session_by_id(self, gamearg)
+        if session:
+            prevchan = get_playchannel_for_session(self, session.sessid)
+            if prevchan:
+                if prevchan.chanid == playchan.chanid:
+                    await interaction.response.send_message('This channel is already using session %d.' % (session.sessid,))
+                else:
+                    await interaction.response.send_message('Session %d is already being used in channel <#%s>.' % (session.sessid, prevchan.chanid,))
+                return
+            set_channel_session(self, playchan, session)
+            await interaction.response.send_message('Activated session for "%s"' % (game.filename,))
+            return
+            
         await interaction.response.send_message('### select ' + game)
         
     async def on_message(self, message):

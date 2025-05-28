@@ -32,6 +32,18 @@ def get_sessions(app):
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     return sessls
     
+def get_session_by_id(app, sessid):
+    try:
+        sessid = int(sessid)
+    except:
+        return None
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM sessions WHERE sessid = ?', (sessid,))
+    tup = res.fetchone()
+    if not tup:
+        return None
+    return Session(*tup)
+    
 def create_session(app, game):
     curs = app.db.cursor()
     res = curs.execute('SELECT sessid FROM sessions')
@@ -49,6 +61,15 @@ def get_playchannels(app):
     res = curs.execute('SELECT * FROM channels')
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
     return chanls
+
+def get_playchannel_for_session(app, sessid):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM channels where sessid = ?', (sessid,))
+    # There shouldn't be more than one.
+    tup = res.fetchone()
+    if not tup:
+        return None
+    return PlayChannel(*tup)
 
 def get_valid_playchannel(app, interaction):
     gid = interaction.guild_id
