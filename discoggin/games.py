@@ -44,6 +44,20 @@ def get_game_by_name(app, val):
             return game
     return None
 
+def get_game_by_session(app, sessid):
+    session = get_session_by_id(app, sessid)
+    if not session:
+        return None
+    return get_game_by_hash(app, session.hash)
+    
+def get_game_by_channel(app, gckey):
+    playchan = get_playchannel(app, gckey)
+    if not playchan:
+        return None
+    if not playchan.sessid:
+        return None
+    return get_game_by_session(app, playchan.sessid)
+
 # Matches empty string, ".", "..", and so on.
 pat_alldots = re.compile('^[.]*$')
 
@@ -117,3 +131,8 @@ def detect_format(path, filename):
     if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
         return 'zcode'
     return None
+
+
+
+from .sessions import get_playchannel, get_session_by_id
+
