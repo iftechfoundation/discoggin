@@ -28,6 +28,14 @@ def get_gamemap(app):
         res[game.hash] = game
     return res
 
+def get_game_by_name(app, val):
+    val = val.lower()
+    ls = get_gamelist(app)
+    for game in ls:
+        if val in game.filename.lower():
+            return game
+    return None
+
 # Matches empty string, ".", "..", and so on.
 pat_alldots = re.compile('^[.]*$')
 

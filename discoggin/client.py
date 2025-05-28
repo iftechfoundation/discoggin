@@ -52,6 +52,12 @@ class DiscogClient(discord.Client):
         self.tree.add_command(discord.app_commands.Command(
             name='sessions', callback=self.on_cmd_sessionlist,
             description='List game sessions'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='newsession', callback=self.on_cmd_newsession,
+            description='Start a new game session in this channel'))
+        self.tree.add_command(discord.app_commands.Command(
+            name='select', callback=self.on_cmd_select,
+            description='Select a game to play in this channel'))
 
         self.httpsession = None
         self.glkstate = None  ###
@@ -161,6 +167,12 @@ class DiscogClient(discord.Client):
         ### is there a message size limit here?
         await interaction.response.send_message(val)
                 
+    async def on_cmd_newsession(self, interaction, game:str):
+        await interaction.response.send_message('### newsession ' + game)
+        
+    async def on_cmd_select(self, interaction, game:str):
+        await interaction.response.send_message('### select ' + game)
+        
     async def on_message(self, message):
         if message.author == self.user:
             return
