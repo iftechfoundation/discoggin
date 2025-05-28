@@ -11,7 +11,7 @@ import discord.app_commands
 from .glk import create_metrics
 from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
-from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash
+from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
 from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
@@ -214,7 +214,11 @@ class DiscogClient(discord.Client):
         if not game:
             await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
             return
-        ### if already on this game...
+        curgame = get_game_by_channel(self, playchan.gckey)
+        if curgame and game.hash == curgame.hash:
+            await interaction.response.send_message('This channel is already playing "%s".' % (curgame.filename,))
+            return
+            
         session = get_available_session_for_hash(self, game.hash)
         if session:
             set_channel_session(self, playchan, session)
