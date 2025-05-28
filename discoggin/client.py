@@ -17,6 +17,13 @@ from .sessions import get_sessions
 ###
 gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
 
+_appcmds = []
+
+def appcmd(name, description):
+    def decorator(func):
+        _appcmds.append( (func.__name__, name, description) )
+        return func
+    return decorator
 
 class DiscogClient(discord.Client):
     def __init__(self, config, cmdsync=False):
@@ -34,30 +41,10 @@ class DiscogClient(discord.Client):
         
         self.tree = discord.app_commands.CommandTree(self)
 
-        self.tree.add_command(discord.app_commands.Command(
-            name='start', callback=self.on_cmd_start,
-            description='Start the current game'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='stop', callback=self.on_cmd_stop,
-            description='Stop the current game (force QUIT)'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='status', callback=self.on_cmd_status,
-            description='Display the status window'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='download', callback=self.on_cmd_download,
-            description='Download an IF game file for play'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='games', callback=self.on_cmd_gamelist,
-            description='List downloaded games'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='sessions', callback=self.on_cmd_sessionlist,
-            description='List game sessions'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='newsession', callback=self.on_cmd_newsession,
-            description='Start a new game session in this channel'))
-        self.tree.add_command(discord.app_commands.Command(
-            name='select', callback=self.on_cmd_select,
-            description='Select a game to play in this channel'))
+        for (key, name, description) in _appcmds:
+            callback = getattr(self, key)
+            cmd = discord.app_commands.Command(name=name, callback=callback, description=description)
+            self.tree.add_command(cmd)
 
         self.httpsession = None
         self.glkstate = None  ###
@@ -101,6 +88,7 @@ class DiscogClient(discord.Client):
     async def on_ready(self):
         logging.info('We have logged in as %s', self.user)
 
+    @appcmd('start', description='Start the current game')
     async def on_cmd_start(self, interaction):
         logging.info('slash command: start')
         ### content based on interaction.channel
@@ -110,6 +98,7 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Game is starting...')
         await self.run_turn(None, interaction.channel)
     
+    @appcmd('stop', description='Stop the current game (force QUIT)')
     async def on_cmd_stop(self, interaction):
         logging.info('slash command: stop')
         if self.glkstate is None:
@@ -118,6 +107,7 @@ class DiscogClient(discord.Client):
         self.glkstate = None
         await interaction.response.send_message('Game has been stopped.')
 
+    @appcmd('status', description='Display the status window')
     async def on_cmd_status(self, interaction):
         logging.info('slash command: status')
         if self.glkstate is None:
@@ -131,6 +121,7 @@ class DiscogClient(discord.Client):
             if out.strip():
                 await chan.send('|\n'+out)
 
+    @appcmd('download', description='Download an game file for play')
     async def on_cmd_download(self, interaction, url:str):
         try:
             msg = await download_game_url(self, url)
@@ -139,6 +130,7 @@ class DiscogClient(discord.Client):
             logging.error('Download: %s', ex, exc_info=ex)
             await interaction.response.send_message('Download error: %s' % (ex,))
 
+    @appcmd('games', description='List downloaded games')
     async def on_cmd_gamelist(self, interaction):
         gamels = get_gamelist(self)
         if not gamels:
@@ -151,6 +143,7 @@ class DiscogClient(discord.Client):
         ### is there a message size limit here?
         await interaction.response.send_message(val)
                 
+    @appcmd('sessions', description='List game sessions')
     async def on_cmd_sessionlist(self, interaction):
         sessls = get_sessions(self)
         if not sessls:
@@ -167,9 +160,11 @@ class DiscogClient(discord.Client):
         ### is there a message size limit here?
         await interaction.response.send_message(val)
                 
+    @appcmd('newsession', description='Start a new game session in this channel')
     async def on_cmd_newsession(self, interaction, game:str):
         await interaction.response.send_message('### newsession ' + game)
         
+    @appcmd('select', description='Select a game to play in this channel')
     async def on_cmd_select(self, interaction, game:str):
         await interaction.response.send_message('### select ' + game)
         
