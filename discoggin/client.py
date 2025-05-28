@@ -155,7 +155,8 @@ class DiscogClient(discord.Client):
         ls = []
         for sess in sessls:
             game = gamemap.get(sess.hash)
-            ls.append('- %s: <t:%s:f>' % (sess.sessid, sess.lastupdate,))
+            gamestr = game.filename if game else '???'
+            ls.append('- session %s: %s <t:%s:f>' % (sess.sessid, gamestr, sess.lastupdate,))
         val = '\n'.join(ls)
         ### is there a message size limit here?
         await interaction.response.send_message(val)
