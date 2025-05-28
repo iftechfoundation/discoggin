@@ -165,8 +165,7 @@ class DiscogClient(discord.Client):
             playchan = chanmap.get(sess.sessid)
             chanstr = ''
             if playchan:
-                dischan = self.get_channel(int(playchan.chanid))
-                chanstr = ' (playing in channel %s)' % (dischan,)
+                chanstr = ' (playing in channel <#%s>)' % (playchan.chanid,)
             ls.append('- session %s: %s%s <t:%s:f>' % (sess.sessid, gamestr, chanstr, sess.lastupdate,))
         val = '\n'.join(ls)
         ### is there a message size limit here?
