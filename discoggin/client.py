@@ -318,6 +318,7 @@ class DiscogClient(discord.Client):
             interpreter = 'glulxer'
         else:
             logging.warning('run_turn: unknown format')
+            await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
             return
         
         autosavedir = os.path.join(self.autosavedir, playchan.session.autosave)
@@ -370,7 +371,12 @@ class DiscogClient(discord.Client):
         try:
             update = json.loads(outdat)
         except:
-            await chan.send('Invalid JSON output: %s' % (outdat,))
+            try:
+                outstr = outdat.decode()
+            except:
+                outstr = str(outdat)
+            logging.error('Invalid JSON output: %r', outstr)
+            await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
 
         if update.get('type') == 'error':
