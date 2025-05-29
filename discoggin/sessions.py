@@ -20,6 +20,10 @@ class PlayChannel:
         self.chanid = chanid
         self.sessid = sessid
 
+        # Filled in by accessors that offer the withgame option
+        self.game = None
+        self.session = None
+
     def __repr__(self):
         val = ''
         if self.sessid:
@@ -96,7 +100,7 @@ def get_playchannel_for_session(app, sessid):
         return None
     return PlayChannel(*tup)
 
-def get_valid_playchannel(app, interaction):
+def get_valid_playchannel(app, interaction, withgame=False):
     gid = interaction.guild_id
     if not gid:
         return None
@@ -112,9 +116,21 @@ def get_valid_playchannel(app, interaction):
     tup = res.fetchone()
     if not tup:
         return None
-    return PlayChannel(*tup)
+    playchan = PlayChannel(*tup)
+
+    if withgame:
+        if playchan.sessid:
+            playchan.session = get_session_by_id(app, playchan.sessid)
+            if playchan.session and playchan.session.hash:
+                playchan.game = get_game_by_hash(app, playchan.session.hash)
+    return playchan
 
 def set_channel_session(app, playchan, session):
     curs = app.db.cursor()
     curs.execute('UPDATE channels SET sessid = ? WHERE gckey = ?', (session.sessid, playchan.gckey,))
+
+
+
+# Late imports
+from .games import get_game_by_hash
 

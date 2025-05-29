@@ -120,7 +120,14 @@ class DiscogClient(discord.Client):
         
     @appcmd('start', description='Start the current game')
     async def on_cmd_start(self, interaction):
-        ### content based on interaction.channel
+        playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        if not playchan.game:
+            await interaction.response.send_message('No game is being played in this channel.')
+            return
+        ### game info!
         if self.glkstate is not None:
             await interaction.response.send_message('The game is already running.')
             return
