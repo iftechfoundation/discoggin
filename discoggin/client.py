@@ -304,12 +304,13 @@ class DiscogClient(discord.Client):
     async def run_turn(self, cmd, chan, playchan, glkstate):
         if not chan:
             logging.warning('run_turn: channel not set')
-            await message.channel.send('Error: The game file seems to be missing.')
             return
 
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
             logging.error('run_turn: game file not found: %s', gamefile)
+            await message.channel.send('Error: The game file seems to be missing.')
+            return
             
         if playchan.game.format == 'zcode':
             interpreter = 'bocfelr'
