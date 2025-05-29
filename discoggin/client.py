@@ -1,3 +1,4 @@
+import os, os.path
 import json
 import subprocess
 import logging
@@ -303,7 +304,24 @@ class DiscogClient(discord.Client):
     async def run_turn(self, cmd, chan, playchan, glkstate):
         if not chan:
             logging.warning('run_turn: channel not set')
+            await message.channel.send('Error: The game file seems to be missing.')
             return
+
+        gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
+        if not os.path.exists(gamefile):
+            logging.error('run_turn: game file not found: %s', gamefile)
+            
+        if playchan.game.format == 'zcode':
+            interpreter = 'bocfelr'
+        elif playchan.game.format == 'glulx':
+            interpreter = 'glulxer'
+        else:
+            logging.warning('run_turn: unknown format')
+            return
+        
+        autosavedir = os.path.join(self.autosavedir, playchan.session.autosave)
+        if not os.path.exists(autosavedir):
+            os.mkdir(autosavedir)
             
         if glkstate is None:
             if cmd is not None:
@@ -317,7 +335,7 @@ class DiscogClient(discord.Client):
             }
             indat = json.dumps(update)
             
-            args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', self.autosavedir, gamefile ]
+            args = [ interpreter, '-singleturn', '--autosave', '--autodir', autosavedir, gamefile ]
         else:
             if cmd is None:
                 logging.warning('Tried to send no command when game was running')
@@ -330,7 +348,7 @@ class DiscogClient(discord.Client):
                 await chan.send('Unable to construct input: %s' % (ex,))
                 return
             
-            args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', self.autosavedir, gamefile ]
+            args = [ interpreter, '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
 
         try:
             proc = subprocess.Popen(

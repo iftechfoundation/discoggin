@@ -9,6 +9,8 @@ class Session:
         self.movecount = movecount
         self.lastupdate = lastupdate
 
+        self.autosave = 's%d' % (self.sessid,)
+
     def __repr__(self):
         timestr = time.ctime(self.lastupdate)
         return '<Session %s (%s): %d moves, %s>' % (self.sessid, self.hash, self.movecount, timestr,)
