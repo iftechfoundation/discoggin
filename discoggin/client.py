@@ -14,7 +14,7 @@ from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
 from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
-from .glk import GlkState, get_glkstate_for_session
+from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 
 _appcmds = []
 
@@ -129,7 +129,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('The game is already running.')
             return
         await interaction.response.send_message('Game is starting...')
-        await self.run_turn(None, interaction.channel, playchan)
+        await self.run_turn(None, interaction.channel, playchan, glkstate)
     
     @appcmd('stop', description='Stop the current game (force QUIT)')
     async def on_cmd_stop(self, interaction):
@@ -144,7 +144,7 @@ class DiscogClient(discord.Client):
         if glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
-        put_glkstate_for_session(self, None)
+        put_glkstate_for_session(self, playchan.sessid, None)
         await interaction.response.send_message('Game has been stopped.')
 
     @appcmd('status', description='Display the status window')
@@ -298,15 +298,14 @@ class DiscogClient(discord.Client):
             await message.channel.send('The game is not running. (**/start** to start it.)')
             return
         
-        logging.info('Command: %s', cmd) ###
-        await self.run_turn(cmd, message.channel, playchan)
+        await self.run_turn(cmd, message.channel, playchan, glkstate)
 
-    async def run_turn(self, cmd, chan, playchan):
+    async def run_turn(self, cmd, chan, playchan, glkstate):
         if not chan:
             logging.warning('run_turn: channel not set')
             return
             
-        if self.glkstate is None:
+        if glkstate is None:
             if cmd is not None:
                 logging.warning('Tried to send command when game was not running: %s', cmd)
                 return
@@ -325,7 +324,7 @@ class DiscogClient(discord.Client):
                 return
                 
             try:
-                input = self.glkstate.construct_input(cmd)
+                input = glkstate.construct_input(cmd)
                 indat = json.dumps(input)
             except Exception as ex:
                 await chan.send('Unable to construct input: %s' % (ex,))
@@ -360,15 +359,17 @@ class DiscogClient(discord.Client):
             await chan.send('Interpreter error: %s' % (msg,))
             return
 
-        if self.glkstate is None:
-            self.glkstate = GlkState()
+        if glkstate is None:
+            glkstate = GlkState()
         try:
-            self.glkstate.accept_update(update)
+            glkstate.accept_update(update)
         except Exception as ex:
             await chan.send('Update error: %s' % (ex,))
             return
 
-        outls = [ content_to_markup(val) for val in self.glkstate.storywindat ]
+        put_glkstate_for_session(self, playchan.sessid, glkstate)
+
+        outls = [ content_to_markup(val) for val in glkstate.storywindat ]
         outls = rebalance_output(outls)
         for out in outls:
             if out.strip():
