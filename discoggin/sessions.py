@@ -100,14 +100,29 @@ def get_playchannel_for_session(app, sessid):
         return None
     return PlayChannel(*tup)
 
-def get_valid_playchannel(app, interaction, withgame=False):
-    gid = interaction.guild_id
-    if not gid:
-        return None
-    if not interaction.channel:
-        return None
-    chanid = interaction.channel.id
-    if not chanid:
+def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
+    ### We call this on every message event, so it would be really good to cache the channel list.
+    if interaction:
+        gid = interaction.guild_id
+        if not gid:
+            return None
+        if not interaction.channel:
+            return None
+        chanid = interaction.channel.id
+        if not chanid:
+            return None
+    elif message:
+        if not message.guild:
+            return None
+        gid = message.guild.id
+        if not gid:
+            return None
+        if not message.channel:
+            return None
+        chanid = message.channel.id
+        if not chanid:
+            return None
+    else:
         return None
     
     gckey = '%s-%s' % (gid, chanid,)

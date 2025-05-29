@@ -8,16 +8,13 @@ import aiohttp
 import discord
 import discord.app_commands
 
-from .glk import create_metrics
-from .glk import GlkState
 from .markup import extract_command, content_to_markup, rebalance_output
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
 from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
-
-###
-gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
+from .glk import create_metrics
+from .glk import GlkState, get_glkstate_for_session
 
 _appcmds = []
 
@@ -55,7 +52,7 @@ class DiscogClient(discord.Client):
             self.tree.add_command(cmd)
 
         self.httpsession = None
-        self.glkstate = None  ###
+        self.glkstates = {}  ###decache!
 
         # Open the sqlite database.
         self.db = sqlite3.connect(self.dbfile)
@@ -127,29 +124,45 @@ class DiscogClient(discord.Client):
         if not playchan.game:
             await interaction.response.send_message('No game is being played in this channel.')
             return
-        ### game info!
-        if self.glkstate is not None:
+        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        if glkstate is not None:
             await interaction.response.send_message('The game is already running.')
             return
         await interaction.response.send_message('Game is starting...')
-        await self.run_turn(None, interaction.channel)
+        await self.run_turn(None, interaction.channel, playchan)
     
     @appcmd('stop', description='Stop the current game (force QUIT)')
     async def on_cmd_stop(self, interaction):
-        if self.glkstate is None:
+        playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        if not playchan.game:
+            await interaction.response.send_message('No game is being played in this channel.')
+            return
+        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        if glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
-        self.glkstate = None
+        put_glkstate_for_session(self, None)
         await interaction.response.send_message('Game has been stopped.')
 
     @appcmd('status', description='Display the status window')
     async def on_cmd_status(self, interaction):
-        if self.glkstate is None:
+        playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        if not playchan.game:
+            await interaction.response.send_message('No game is being played in this channel.')
+            return
+        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        if glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
         chan = interaction.channel
         await interaction.response.send_message('Status line displayed.', ephemeral=True)
-        outls = [ content_to_markup(val) for val in self.glkstate.statuswindat ]
+        outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
         outls = rebalance_output(outls)
         for out in outls:
             if out.strip():
@@ -263,17 +276,32 @@ class DiscogClient(discord.Client):
         
     async def on_message(self, message):
         if message.author == self.user:
+            # silently ignore messages we sent
             return
 
+        playchan = get_valid_playchannel(self, message=message, withgame=True)
+        if not playchan:
+            # silently ignore messages in non-play channels
+            return
+        
         cmd = extract_command(message.content)
-        if cmd is not None:
-            if self.glkstate is None:
-                await message.channel.send('The game is not running. (**/start** to start it.)')
-                return
-            logging.info('Command: %s', cmd) ###
-            await self.run_turn(cmd, message.channel)
+        if not cmd:
+            # silently ignores messages that don't look like commands
+            return
+        
+        if not playchan.game:
+            await message.channel.send('No game is being played in this channel.')
+            return
+        
+        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        if glkstate is None:
+            await message.channel.send('The game is not running. (**/start** to start it.)')
+            return
+        
+        logging.info('Command: %s', cmd) ###
+        await self.run_turn(cmd, message.channel, playchan)
 
-    async def run_turn(self, cmd, chan):
+    async def run_turn(self, cmd, chan, playchan):
         if not chan:
             logging.warning('run_turn: channel not set')
             return

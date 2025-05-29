@@ -1,4 +1,13 @@
 
+def get_glkstate_for_session(app, sessid):
+    ### DB this!
+    return app.glkstates.get(sessid)
+
+def put_glkstate_for_session(app, sessid, state):
+    # state may be None to delete
+    ### DB this!
+    app.glkstates[sessid] = state
+
 class GlkState:
     def __init__(self):
         # Lists of ContentLines
