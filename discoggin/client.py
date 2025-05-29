@@ -22,6 +22,10 @@ gamefile = '/Users/zarf/src/glk-dev/unittests/Advent.ulx'
 _appcmds = []
 
 def appcmd(name, description):
+    """A decorator for slash commands.
+    The discord module provides such a decorator but I don't like it.
+    I wrote this one instead.
+    """
     def decorator(func):
         _appcmds.append( (func.__name__, name, description) )
         return func
@@ -36,13 +40,15 @@ class DiscogClient(discord.Client):
         self.gamesdir = config['DEFAULT']['GamesDir']
         self.dbfile = config['DEFAULT']['DBFile']
         
-        intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True,  message_content=True)
+        intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True, message_content=True)
         ### members? needs additional bot priv
 
         super().__init__(intents=intents)
-        
+
+        # Container for slash commands.
         self.tree = discord.app_commands.CommandTree(self)
 
+        # Add all the slash commands noted by the @appcmd decorator.
         for (key, name, description) in _appcmds:
             callback = getattr(self, key)
             cmd = discord.app_commands.Command(name=name, callback=callback, description=description)
@@ -51,24 +57,41 @@ class DiscogClient(discord.Client):
         self.httpsession = None
         self.glkstate = None  ###
 
+        # Open the sqlite database.
         self.db = sqlite3.connect(self.dbfile)
         self.db.isolation_level = None   # autocommit
 
 
     async def setup_hook(self):
+        """Called when the client is starting up. We have not yet connected
+        to Discord, but we have entered the async regime.
+        """
+        # Create the HTTP session, which must happen inside the async
+        # event loop.
         headers = { 'user-agent': 'Discoggin-IF-Terp' }
         self.httpsession = aiohttp.ClientSession(headers=headers)
         
         if self.cmdsync:
+            # Push our slash commands to Discord. We only need to do
+            # this once after adding or modifying a slash command.
+            # (No, we're not connected to Discord yet. This uses web
+            # RPC calls rather than the websocket.)
             logging.info('Syncing %d slash commands...', len(_appcmds))
             await self.tree.sync()
 
     async def close(self):
+        """Called when the client is shutting down. We override this to
+        finalize resources.
+        """
         logging.warning('Shutting down...')
         
         if self.httpsession:
             await self.httpsession.close()
             self.httpsession = None
+
+        if self.db:
+            self.db.close()
+            self.db = None
             
         await super().close()
         
@@ -88,8 +111,13 @@ class DiscogClient(discord.Client):
         return task
 
     async def on_ready(self):
+        """We have finished connecting to Discord.
+        (Docs recommend against doing Discord API calls from here.)
+        """
         logging.info('Logged in as %s', self.user)
 
+    # Slash command implementations.
+        
     @appcmd('start', description='Start the current game')
     async def on_cmd_start(self, interaction):
         ### content based on interaction.channel
