@@ -370,6 +370,7 @@ class DiscogClient(discord.Client):
 
         try:
             update = json.loads(outdat)
+            ### Allow for the case of an error stanza followed by an update stanza. (This can apparently happen.) Display the error but continue with the update.
         except:
             try:
                 outstr = outdat.decode()

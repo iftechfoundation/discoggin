@@ -201,9 +201,11 @@ class GlkState:
                 'window':self.charinputwin, 'value':cmd
             }
         if self.specialinput == 'fileref_prompt':
+            ### sanitize cmd and put in session dir
+            path = cmd ###
             return {
                 'type':'specialresponse', 'gen':self.generation,
-                'response':'fileref_prompt', 'value':cmd
+                'response':'fileref_prompt', 'value':path
             }
         raise Exception('game is not expecting input')
 
