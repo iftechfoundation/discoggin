@@ -348,6 +348,10 @@ class DiscogClient(discord.Client):
             except Exception as ex:
                 await chan.send('Unable to construct input: %s' % (ex,))
                 return
+
+            extrainput = None
+            if input.get('type') == 'specialresponse' and input.get('response') == 'fileref_prompt':
+                extrainput = cmd
             
             args = [ interpreter, '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
 
@@ -388,7 +392,7 @@ class DiscogClient(discord.Client):
         if glkstate is None:
             glkstate = GlkState()
         try:
-            glkstate.accept_update(update)
+            glkstate.accept_update(update, extrainput)
         except Exception as ex:
             await chan.send('Update error: %s' % (ex,))
             return

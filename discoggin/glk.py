@@ -83,7 +83,7 @@ class GlkState:
         state.windows = intkeydict(obj['windows'])
         return state
     
-    def accept_update(self, update):
+    def accept_update(self, update, extrainput=None):
         """Parse the GlkOte update object and update the state
         accordingly.
         This is complicated. For the format, see
@@ -123,10 +123,19 @@ class GlkState:
                     text = content.get('text')
                     # Clear the buffer. But if the content starts with
                     # append, preserve the last line.
-                    if text and text[0].get('append') and self.storywindat:
+                    willappend = ((text and text[0].get('append'))
+                                  or (extrainput is not None))
+                    if willappend and self.storywindat:
                         self.storywindat = [ self.storywindat[-1] ]
                     else:
                         self.storywindat = []
+                    if extrainput is not None:
+                        dat = ContentLine(extrainput, 'input')
+                        if len(self.storywindat):
+                            self.storywindat[-1].extend(dat)
+                        else:
+                            self.storywindat.append(dat)
+                        self.storywindat.append(ContentLine())
                     if text:
                         for line in text:
                             dat = extract_raw(line)
