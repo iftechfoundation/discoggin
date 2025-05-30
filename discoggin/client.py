@@ -356,6 +356,7 @@ class DiscogClient(discord.Client):
                 args,
                 bufsize=0,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            ### async communicate? (would need to use mild per-session locking)
             ### timeout parameter?
             (outdat, errdat) = proc.communicate((indat+'\n').encode(), timeout=2)
         except Exception as ex:

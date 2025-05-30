@@ -194,6 +194,11 @@ class GlkState:
                 'type':'char', 'gen':self.generation,
                 'window':self.charinputwin, 'value':cmd
             }
+        if self.specialinput == 'fileref_prompt':
+            return {
+                'type':'specialresponse', 'gen':self.generation,
+                'response':'fileref_prompt', 'value':cmd
+            }
         raise Exception('game is not expecting input')
 
 def strkeydict(map):
