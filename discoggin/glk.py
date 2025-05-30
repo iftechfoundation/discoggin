@@ -30,7 +30,12 @@ class GlkState:
         self.generation = 0
 
     def to_jsonable(self):
-        ### do not stash return object
+        """Turn a GlkState into a jsonable dict. We use this for
+        serialization.
+        Note that the contents of a GlkState are not immutable. So
+        you shouldn't hold onto the object returned by this call;
+        serialize it immediately and discard it.
+        """
         obj = {}
         for key in GlkState._singleton_keys:
             obj[key] = getattr(self, key)
@@ -43,6 +48,8 @@ class GlkState:
 
     @staticmethod
     def from_jsonable(obj):
+        """Create a GlkState from a jsonable object (from to_jsonable).
+        """
         state = GlkState()
         for key in GlkState._singleton_keys:
             setattr(state, key, obj[key])
@@ -54,9 +61,11 @@ class GlkState:
         return state
     
     def accept_update(self, update):
-        # Parse the update object. This is complicated. For the format,
-        # see http://eblong.com/zarf/glk/glkote/docs.html
-        
+        """Parse the GlkOte update object and update the state
+        accordingly.
+        This is complicated. For the format, see
+        http://eblong.com/zarf/glk/glkote/docs.html
+        """
         self.generation = update.get('gen')
 
         windows = update.get('windows')
@@ -141,6 +150,12 @@ class GlkState:
                 #    self.mouseinputwin = input.get('id')
 
     def construct_input(self, cmd):
+        """Given a player command string, construct a GlkOte input
+        appropriate to what the game is expecting.
+        TODO: If the game is expecting more than one kind of input
+        (e.g. line+hypertext or line+timer), allow the player to
+        specify both.
+        """
         if self.lineinputwin:
             return {
                 'type':'line', 'gen':self.generation,
