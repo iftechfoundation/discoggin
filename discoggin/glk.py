@@ -267,7 +267,13 @@ def extract_raw(line):
     return res
 
 def sanitize_filename(val):
-    return val ###
+    """Make sure a filename isn't going to bounce into a different
+    directory.
+    """
+    val = val.replace('/', '_')
+    if val.startswith('.'):
+        val = '_'+val
+    return val
 
 def create_metrics(width=None, height=None):
     if not width:

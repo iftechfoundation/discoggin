@@ -328,7 +328,9 @@ class DiscogClient(discord.Client):
         savefiledir = os.path.join(self.savefiledir, playchan.session.autosave)
         if not os.path.exists(savefiledir):
             os.mkdir(savefiledir)
-            
+
+        input = None
+        extrainput = None
         if glkstate is None:
             if cmd is not None:
                 logging.warning('Tried to send command when game was not running: %s', cmd)
@@ -354,7 +356,6 @@ class DiscogClient(discord.Client):
                 await chan.send('Unable to construct input: %s' % (ex,))
                 return
 
-            extrainput = None
             if input.get('type') == 'specialresponse' and input.get('response') == 'fileref_prompt':
                 extrainput = cmd
             
