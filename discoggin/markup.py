@@ -12,7 +12,9 @@ def extract_command(msg):
 
 def content_to_markup(dat):
     res = []
-    for (text, style, link) in dat.arr:
+    for tup in dat.arr:
+        text = tup[0]
+        style = tup[1] if len(tup) > 1 else 'normal'
         val = escape(text)
         if style == 'header' or style == 'subheader' or style == 'input':
             val = '**'+val+'**'

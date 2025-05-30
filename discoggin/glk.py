@@ -177,13 +177,18 @@ class ContentLine:
         return dat
 
     def add(self, text='', style='normal', link=None):
-        self.arr.append( (text, style, link) )
+        if link:
+            self.arr.append( (text, style, link) )
+        elif style and style != 'normal':
+            self.arr.append( (text, style) )
+        else:
+            self.arr.append( (text,) )
 
     def extend(self, dat):
         self.arr.extend(dat.arr)
                 
 def extract_raw(line):
-    # Extract the content array from a line object.
+    # Extract the content array from a GlkOte line object.
     res = ContentLine()
     con = line.get('content')
     if not con:
