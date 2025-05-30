@@ -392,6 +392,7 @@ class DiscogClient(discord.Client):
             await chan.send('Update error: %s' % (ex,))
             return
 
+        ### detect game-over condition and set glkstate to None!
         put_glkstate_for_session(self, playchan.sessid, glkstate)
 
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
