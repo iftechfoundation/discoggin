@@ -35,6 +35,7 @@ class DiscogClient(discord.Client):
         self.cmdsync = cmdsync
 
         self.autosavedir = config['DEFAULT']['AutoSaveDir']
+        self.savefiledir = config['DEFAULT']['SaveFileDir']
         self.gamesdir = config['DEFAULT']['GamesDir']
         self.dbfile = config['DEFAULT']['DBFile']
         
@@ -324,6 +325,10 @@ class DiscogClient(discord.Client):
         if not os.path.exists(autosavedir):
             os.mkdir(autosavedir)
             
+        savefiledir = os.path.join(self.savefiledir, playchan.session.autosave)
+        if not os.path.exists(savefiledir):
+            os.mkdir(savefiledir)
+            
         if glkstate is None:
             if cmd is not None:
                 logging.warning('Tried to send command when game was not running: %s', cmd)
@@ -343,7 +348,7 @@ class DiscogClient(discord.Client):
                 return
                 
             try:
-                input = glkstate.construct_input(cmd)
+                input = glkstate.construct_input(cmd, savefiledir)
                 indat = json.dumps(input)
             except Exception as ex:
                 await chan.send('Unable to construct input: %s' % (ex,))

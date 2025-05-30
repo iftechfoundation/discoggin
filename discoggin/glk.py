@@ -191,7 +191,7 @@ class GlkState:
                 #if input.get('mouse'):
                 #    self.mouseinputwin = input.get('id')
 
-    def construct_input(self, cmd):
+    def construct_input(self, cmd, savefiledir):
         """Given a player command string, construct a GlkOte input
         appropriate to what the game is expecting.
         TODO: If the game is expecting more than one kind of input
@@ -210,8 +210,7 @@ class GlkState:
                 'window':self.charinputwin, 'value':cmd
             }
         if self.specialinput == 'fileref_prompt':
-            ### sanitize cmd and put in session dir
-            path = cmd ###
+            path = os.path.join(savefiledir, sanitize_filename(cmd))
             return {
                 'type':'specialresponse', 'gen':self.generation,
                 'response':'fileref_prompt', 'value':path
@@ -267,6 +266,8 @@ def extract_raw(line):
             ### hyperlink
     return res
 
+def sanitize_filename(val):
+    return val ###
 
 def create_metrics(width=None, height=None):
     if not width:
