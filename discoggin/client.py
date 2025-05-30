@@ -165,8 +165,8 @@ class DiscogClient(discord.Client):
         files.sort(key=lambda ent: ent.name)
         ls = [ 'Files for the current session ("%s"):' % (playchan.game.filename,) ]
         for ent in files:
-            ### include timestamp!
-            ls.append('- ' + escape(ent.name))
+            timeval = int(ent.stat().st_mtime)
+            ls.append('- %s <t:%s:f>' % (escape(ent.name), timeval,))
         await interaction.response.send_message('\n'.join(ls))
         
     @appcmd('status', description='Display the status window')
