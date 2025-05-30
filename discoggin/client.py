@@ -9,7 +9,7 @@ import aiohttp
 import discord
 import discord.app_commands
 
-from .markup import extract_command, content_to_markup, rebalance_output
+from .markup import extract_command, content_to_markup, rebalance_output, escape
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
@@ -132,7 +132,7 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Game is starting...')
         await self.run_turn(None, interaction.channel, playchan, glkstate)
     
-    @appcmd('stop', description='Stop the current game (force QUIT)')
+    @appcmd('forcequit', description='Force the current game to end')
     async def on_cmd_stop(self, interaction):
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
@@ -148,6 +148,27 @@ class DiscogClient(discord.Client):
         put_glkstate_for_session(self, playchan.session, None)
         await interaction.response.send_message('Game has been stopped.')
 
+    @appcmd('files', description='List the save files for the current session')
+    async def on_cmd_listfiles(self, interaction):
+        playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        savefiledir = os.path.join(self.savefiledir, playchan.session.autosave)
+        if not os.path.exists(savefiledir):
+            files = []
+        else:
+            files = [ ent for ent in os.scandir(savefiledir) if ent.is_file() ]
+        if not files:
+            await interaction.response.send_message('No files for the current session ("%s")' % (playchan.game.filename,))
+            return
+        files.sort(key=lambda ent: ent.name)
+        ls = [ 'Files for the current session ("%s"):' % (playchan.game.filename,) ]
+        for ent in files:
+            ### include timestamp!
+            ls.append('- ' + escape(ent.name))
+        await interaction.response.send_message('\n'.join(ls))
+        
     @appcmd('status', description='Display the status window')
     async def on_cmd_status(self, interaction):
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
