@@ -97,9 +97,13 @@ class GlkState:
                 if not win:
                     raise Exception('No such window')
                 if win.get('type') == 'buffer':
-                    self.storywindat = []
-                    ### preserve last line if we start with append...
                     text = content.get('text')
+                    # Clear the buffer. But if the content starts with
+                    # append, preserve the last line.
+                    if text and text[0].get('append') and self.storywindat:
+                        self.storywindat = [ self.storywindat[-1] ]
+                    else:
+                        self.storywindat = []
                     if text:
                         for line in text:
                             dat = extract_raw(line)
