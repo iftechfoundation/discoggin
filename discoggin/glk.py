@@ -1,12 +1,35 @@
+import os, os.path
+import json
+import logging
 
-def get_glkstate_for_session(app, sessid):
-    ### DB this!
-    return app.glkstates.get(sessid)
+def get_glkstate_for_session(app, session):
+    """Load the GlkState for a session, or None if the session is not
+    running.
+    """
+    path = os.path.join(app.autosavedir, session.autosave, 'glkstate.json')
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path) as fl:
+            obj = json.load(fl)
+        return GlkState.from_jsonable(obj)
+    except Exception as ex:
+        logging.error('get_glkstate: %s', ex, exc_info=ex)
+        return None
 
-def put_glkstate_for_session(app, sessid, state):
-    # state may be None to delete
-    ### DB this!
-    app.glkstates[sessid] = state
+def put_glkstate_for_session(app, session, state):
+    """Store the GlkState for a session, or delete it if state is None.
+    This assumes the session directory exists. (Unless state is None,
+    in which case it's okay if there is nothing to delete!)
+    """
+    path = os.path.join(app.autosavedir, session.autosave, 'glkstate.json')
+    if not state:
+        if os.path.exists(path):
+            os.remove(path)
+    else:
+        obj = state.to_jsonable()
+        with open(path, 'w') as fl:
+            json.dump(obj, fl)
 
 class GlkState:
     _singleton_keys = [ 'generation', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]

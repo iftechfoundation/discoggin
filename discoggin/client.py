@@ -53,7 +53,6 @@ class DiscogClient(discord.Client):
             self.tree.add_command(cmd)
 
         self.httpsession = None
-        self.glkstates = {}  ###decache!
 
         # Open the sqlite database.
         self.db = sqlite3.connect(self.dbfile)
@@ -125,7 +124,7 @@ class DiscogClient(discord.Client):
         if not playchan.game:
             await interaction.response.send_message('No game is being played in this channel.')
             return
-        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        glkstate = get_glkstate_for_session(self, playchan.session)
         if glkstate is not None:
             await interaction.response.send_message('The game is already running.')
             return
@@ -141,11 +140,11 @@ class DiscogClient(discord.Client):
         if not playchan.game:
             await interaction.response.send_message('No game is being played in this channel.')
             return
-        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        glkstate = get_glkstate_for_session(self, playchan.session)
         if glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
-        put_glkstate_for_session(self, playchan.sessid, None)
+        put_glkstate_for_session(self, playchan.session, None)
         await interaction.response.send_message('Game has been stopped.')
 
     @appcmd('status', description='Display the status window')
@@ -157,7 +156,7 @@ class DiscogClient(discord.Client):
         if not playchan.game:
             await interaction.response.send_message('No game is being played in this channel.')
             return
-        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        glkstate = get_glkstate_for_session(self, playchan.session)
         if glkstate is None:
             await interaction.response.send_message('The game is not running.')
             return
@@ -294,7 +293,7 @@ class DiscogClient(discord.Client):
             await message.channel.send('No game is being played in this channel.')
             return
         
-        glkstate = get_glkstate_for_session(self, playchan.sessid)
+        glkstate = get_glkstate_for_session(self, playchan.session)
         if glkstate is None:
             await message.channel.send('The game is not running. (**/start** to start it.)')
             return
@@ -393,7 +392,7 @@ class DiscogClient(discord.Client):
             return
 
         ### detect game-over condition and set glkstate to None!
-        put_glkstate_for_session(self, playchan.sessid, glkstate)
+        put_glkstate_for_session(self, playchan.session, glkstate)
 
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
         outls = rebalance_output(outls)
