@@ -4,6 +4,8 @@ import re
 pat_cmd = re.compile('^[\\s]*>(.*)$')
 
 def extract_command(msg):
+    """See whether a Discord message is meant as a command input.
+    """
     match = pat_cmd.match(msg)
     if match is None:
         return None
@@ -11,6 +13,9 @@ def extract_command(msg):
     return val.strip()
 
 def content_to_markup(dat):
+    """Convert a ContentLine object into a Discord message, using
+    Discord markup as much as possible.
+    """
     res = []
     for tup in dat.arr:
         text = tup[0]
@@ -28,14 +33,25 @@ def content_to_markup(dat):
 pat_singlechar = re.compile('[`*_<>\\[\\]\\\\]')
 
 def escape(val):
+    """Escape a string so that Discord will interpret it as plain text.
+    """
     val = pat_singlechar.sub(lambda match:'\\'+match.group(0), val)
     ### more?
     ### don't escape inside `` spans? Can't escape ` in there, looks like
     return val
 
+# Maximum size of a Discord message (minus a safety margin).
 MSG_LIMIT = 1990
 
 def rebalance_output(ls):
+    """Given a list of lines (paragraphs) to be sent as a Discord message,
+    combine them as much as possible while staying under the Discord
+    size limit. If there are any lines longer than the limit, break
+    them up (preferably at word boundaries).
+
+    This will introduce paragraph breaks into very long paragraphs;
+    no help for that.
+    """
     res = []
     cur = None
     for val in ls:
