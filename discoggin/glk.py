@@ -9,6 +9,9 @@ def put_glkstate_for_session(app, sessid, state):
     app.glkstates[sessid] = state
 
 class GlkState:
+    _singleton_keys = [ 'generation', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]
+    _contentlist_keys = [ 'statuswindat', 'storywindat', 'graphicswindat' ]
+    
     def __init__(self):
         # Lists of ContentLines
         self.statuswindat = []
@@ -29,9 +32,9 @@ class GlkState:
     def to_jsonable(self):
         ### do not stash return object
         obj = {}
-        for key in [ 'generation', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]:
+        for key in GlkState._singleton_keys:
             obj[key] = getattr(self, key)
-        for key in [ 'statuswindat', 'storywindat', 'graphicswindat' ]:
+        for key in GlkState._contentlist_keys:
             arr = getattr(self, key)
             obj[key] = [ dat.to_jsonable() for dat in arr ]
         obj['statuslinestarts'] = strkeydict(self.statuslinestarts)
@@ -39,9 +42,15 @@ class GlkState:
         return obj
 
     @staticmethod
-    def from_jsonable(arr):
+    def from_jsonable(obj):
         state = GlkState()
-        ###
+        for key in GlkState._singleton_keys:
+            setattr(state, key, obj[key])
+        for key in GlkState._contentlist_keys:
+            ls = [ ContentLine.from_jsonable(val) for val in obj[key] ]
+            setattr(state, key, ls)
+        state.statuslinestarts = intkeydict(obj['statuslinestarts'])
+        state.windows = intkeydict(obj['windows'])
         return state
     
     def accept_update(self, update):
