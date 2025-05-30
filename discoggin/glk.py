@@ -152,6 +152,12 @@ class GlkState:
         specialinputs = update.get('specialinput')
         if specialinputs is not None:
             self.specialinput = specialinputs.get('type')
+            if self.specialinput == 'fileref_prompt':
+                inptype = specialinputs.get('filetype', '???')
+                inpmode = specialinputs.get('filemode', '???')
+                val = 'Enter %s filename to %s:' % (inptype, inpmode,)
+                self.storywindat.append(ContentLine(val))
+                self.storywindat.append(ContentLine('>>'))
             self.lineinputwin = None
             self.charinputwin = None
             self.hyperlinkinputwin = None
@@ -208,8 +214,10 @@ def intkeydict(map):
     return dict([ (int(key), val) for (key, val) in map.items() ])
     
 class ContentLine:
-    def __init__(self):
+    def __init__(self, text=None, style='normal'):
         self.arr = []
+        if text is not None:
+            self.add(text, style)
 
     def __repr__(self):
         return 'C:'+repr(self.arr)
