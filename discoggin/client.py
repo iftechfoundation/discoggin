@@ -323,6 +323,7 @@ class DiscogClient(discord.Client):
         await self.run_turn(cmd, message.channel, playchan, glkstate)
 
     async def run_turn(self, cmd, chan, playchan, glkstate):
+        ### avoid the case of two in-flight commands in the same session
         if not chan:
             logging.warning('run_turn: channel not set')
             return
