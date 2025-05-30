@@ -25,7 +25,25 @@ class GlkState:
         self.specialinput = None
         self.hyperlinkinputwin = None
         self.generation = 0
-        
+
+    def to_jsonable(self):
+        ### do not stash return object
+        obj = {}
+        for key in [ 'generation', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]:
+            obj[key] = getattr(self, key)
+        for key in [ 'statuswindat', 'storywindat', 'graphicswindat' ]:
+            arr = getattr(self, key)
+            obj[key] = [ dat.to_jsonable() for dat in arr ]
+        obj['statuslinestarts'] = strkeydict(self.statuslinestarts)
+        obj['windows'] = strkeydict(self.windows)
+        return obj
+
+    @staticmethod
+    def from_jsonable(arr):
+        state = GlkState()
+        ###
+        return state
+    
     def accept_update(self, update):
         # Parse the update object. This is complicated. For the format,
         # see http://eblong.com/zarf/glk/glkote/docs.html
@@ -126,13 +144,28 @@ class GlkState:
                 'window':self.charinputwin, 'value':cmd
             }
         raise Exception('game is not expecting input')
-                
+
+def strkeydict(map):
+    return dict([ (str(key), val) for (key, val) in map.items() ])
+    
+def intkeydict(map):
+    return dict([ (int(key), val) for (key, val) in map.items() ])
+    
 class ContentLine:
     def __init__(self):
         self.arr = []
 
     def __repr__(self):
         return 'C:'+repr(self.arr)
+
+    def to_jsonable(self):
+        return self.arr
+
+    @staticmethod
+    def from_jsonable(arr):
+        dat = ContentLine()
+        dat.arr = arr
+        return dat
 
     def add(self, text='', style='normal', link=None):
         self.arr.append( (text, style, link) )
