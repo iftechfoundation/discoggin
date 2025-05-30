@@ -1,9 +1,9 @@
 import os, os.path
 import json
-import subprocess
 import logging
 import sqlite3
 import asyncio
+import asyncio.subprocess
 import aiohttp
 
 import discord
@@ -383,13 +383,11 @@ class DiscogClient(discord.Client):
             args = [ interpreter, '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
 
         try:
-            proc = subprocess.Popen(
-                args,
-                bufsize=0,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            ### async communicate? (would need to use mild per-session locking)
-            ### timeout parameter?
-            (outdat, errdat) = proc.communicate((indat+'\n').encode(), timeout=2)
+            proc = await asyncio.create_subprocess_exec(
+                *args,
+                stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+            ### timeout? wrap with asyncio.wait_for()
+            (outdat, errdat) = await proc.communicate((indat+'\n').encode())
         except Exception as ex:
             logging.error('Interpreter exception: %s', ex, exc_info=ex)
             await chan.send('Interpreter exception: %s' % (ex,))
