@@ -221,7 +221,7 @@ class DiscogClient(discord.Client):
         if not sessls:
             await interaction.response.send_message('No game sessions in progress')
             return
-        sessls.sort(key=lambda sess: sess.lastupdate)
+        sessls.sort(key=lambda sess: -sess.lastupdate)
         gamemap = get_gamemap(self)
         chanls = get_playchannels(self)
         chanmap = {}

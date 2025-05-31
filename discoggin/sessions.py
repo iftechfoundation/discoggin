@@ -64,7 +64,7 @@ def get_available_session_for_hash(app, hash):
     availls = [ sess for sess in sessls if sess.sessid not in chanmap ]
     if not availls:
         return None
-    availls.sort(key=lambda sess: sess.lastupdate)
+    availls.sort(key=lambda sess: -sess.lastupdate)
     return availls[0]
 
 def create_session(app, game):
