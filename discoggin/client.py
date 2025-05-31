@@ -30,6 +30,8 @@ def appcmd(name, description):
     return decorator
 
 class DiscogClient(discord.Client):
+    """Our Discord client class.
+    """
     def __init__(self, config, cmdsync=False):
         self.config = config
         self.cmdsync = cmdsync
@@ -40,7 +42,6 @@ class DiscogClient(discord.Client):
         self.dbfile = config['DEFAULT']['DBFile']
         
         intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True, message_content=True)
-        ### members? needs additional bot priv
 
         super().__init__(intents=intents)
 
@@ -53,12 +54,13 @@ class DiscogClient(discord.Client):
             cmd = discord.app_commands.Command(name=name, callback=callback, description=description)
             self.tree.add_command(cmd)
 
+        # Our async HTTP client session.
+        # We will set this up in setup_hook.
         self.httpsession = None
 
         # Open the sqlite database.
         self.db = sqlite3.connect(self.dbfile)
         self.db.isolation_level = None   # autocommit
-
 
     async def setup_hook(self):
         """Called when the client is starting up. We have not yet connected
@@ -297,6 +299,9 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
         
     async def on_message(self, message):
+        """Event handler for regular Discord chat messages.
+        We will respond to messages that look like ">GET LAMP".
+        """
         if message.author == self.user:
             # silently ignore messages we sent
             return
@@ -308,7 +313,7 @@ class DiscogClient(discord.Client):
         
         cmd = extract_command(message.content)
         if not cmd:
-            # silently ignores messages that don't look like commands
+            # silently ignore messages that don't look like commands
             return
         
         if not playchan.game:
@@ -323,6 +328,10 @@ class DiscogClient(discord.Client):
         await self.run_turn(cmd, message.channel, playchan, glkstate)
 
     async def run_turn(self, cmd, chan, playchan, glkstate):
+        """Execute a turn by invoking an interpreter.
+        The cmd and glkstate arguments should be None for the initial turn
+        (starting the game).
+        """
         ### avoid the case of two in-flight commands in the same session
         if not chan:
             logging.warning('run_turn: channel not set')
@@ -353,7 +362,9 @@ class DiscogClient(discord.Client):
 
         input = None
         extrainput = None
+        
         if glkstate is None:
+            # Game-start case.
             if cmd is not None:
                 logging.warning('Tried to send command when game was not running: %s', cmd)
                 return
@@ -367,6 +378,7 @@ class DiscogClient(discord.Client):
             
             args = [ interpreter, '-singleturn', '--autosave', '--autodir', autosavedir, gamefile ]
         else:
+            # Regular turn case.
             if cmd is None:
                 logging.warning('Tried to send no command when game was running')
                 return
@@ -383,6 +395,8 @@ class DiscogClient(discord.Client):
             
             args = [ interpreter, '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
 
+        # Launch the interpreter, push an input event into it, and then pull
+        # an update out.
         try:
             proc = await asyncio.create_subprocess_exec(
                 *args,
@@ -410,11 +424,13 @@ class DiscogClient(discord.Client):
             await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
 
+        # The update was a JSON-encoded error.
         if update.get('type') == 'error':
             msg = update.get('message', '???')
             await chan.send('Interpreter error: %s' % (msg,))
             return
 
+        # Update glkstate with the output.
         if glkstate is None:
             glkstate = GlkState()
         try:
@@ -426,6 +442,7 @@ class DiscogClient(discord.Client):
         ### detect game-over condition and set glkstate to None!
         put_glkstate_for_session(self, playchan.session, glkstate)
 
+        # Display the output.
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
         outls = rebalance_output(outls)
         for out in outls:
