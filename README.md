@@ -35,7 +35,9 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 
 Discoggin uses traditional IF interpreters installed on the bot server. When a player enters a command, the bot fires up the interpreter, loads the last-saved position, passes in the command, saves the position again, and reports the command results on the Discord channel.
 
-Because the interpreter only runs a single move at a time, there is no RAM or CPU cost associated with a session -- even an active session. Everything is just files on disk. On the other hand, the server incurs the CPU cost of launching an interpreter every time a command is processed.
+The interpreters use an autosave feature, so you never have to explicitly save a game. But if you do, the save file is kept as part of the session data. The same is true of transcripts or other game data files. (Downloading a save file or transcript is a planned future feature.)
+
+Because the interpreter only runs a single move at a time, there is no RAM or CPU cost associated with a session -- whether the session is active or background. Everything is just files on disk. On the other hand, the server incurs the CPU cost of launching an interpreter every time a command is processed.
 
 Getting even deeper: the interpreters all use the [RemGlk][] library, which translates the standard IF interface (story and status windows) into a stream of JSON updates. The Discoggin bot therefore just has to launch the interpreter as a subprocess (with the `--singleturn` option), and pass JSON in and out.
 
