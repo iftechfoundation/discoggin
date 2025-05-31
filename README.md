@@ -10,6 +10,12 @@ Discoggin (the name doesn't mean anything) allows players to run old-style inter
 
 At present, Discoggin can only play Glulx games (file suffix `.ulx` or `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks.
 
+Discoggin is configured to run on specific channels, which are assumed to be dedicated to playing IF. It can only play one game at a time per channel, but it can keep any number of game sessions paused in the background. A "session" is a particular game along with its current state and any save files you've saved.
+
+(The idea is that one group of players might log in on Tuesdays to play game X, while another group is playing game Y on Thursdays. You just have to **/select** your game session when you arrive in the channel. You will be back in your game, exactly where you left off.)
+
+Sessions and games not played for thirty days will be discarded.
+
 ## Slash commands
 
 Discoggin is controlled with the usual sort of Discord slash commands.
@@ -24,8 +30,6 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 - /status : Display the current status line of a game.
 - /files : List save files (and other data files) recorded in this session.
 - /forcequit : Shut down a game if it's gotten stuck for some reason. (You will then need to /start it again.)
-
-Sessions and games not played for thirty days will be discarded.
 
 ## Under the hood
 
