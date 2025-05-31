@@ -192,8 +192,8 @@ class DiscogClient(discord.Client):
             if out.strip():
                 await chan.send('|\n'+out)
 
-    @appcmd('download', description='Download a game file for play')
-    async def on_cmd_download(self, interaction, url:str):
+    @appcmd('install', description='Download and install a game file for play')
+    async def on_cmd_install(self, interaction, url:str):
         try:
             msg = await download_game_url(self, url)
             await interaction.response.send_message(msg)
