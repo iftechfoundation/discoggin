@@ -39,4 +39,5 @@ Because the interpreter only runs a single move at a time, there is no RAM or CP
 
 Getting even deeper: the interpreters all use the [RemGlk][] library, which translates the standard IF interface (story and status windows) into a stream of JSON updates. The Discoggin bot therefore just has to launch the interpreter as a subprocess (with the `--singleturn` option), and pass JSON in and out.
 
+[RemGlk]: https://github.com/erkyrath/remglk
 
