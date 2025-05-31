@@ -10,9 +10,11 @@ Discoggin (the name doesn't mean anything) allows players to run old-style inter
 
 At present, Discoggin can only play Glulx games (file suffix `.ulx` or `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks.
 
-Discoggin is configured to run on specific channels, which are assumed to be dedicated to playing IF. It can only play one game at a time per channel, but it can keep any number of game sessions paused in the background. A "session" is a particular game along with its current state and any save files you've saved.
+Discoggin is configured to run on specific Discord channels, which are assumed to be dedicated to playing IF. (Non-players can mute the those channels.) It can only play one game at a time per channel, but it can keep any number of game sessions paused in the background. A "session" is a particular game along with its current state and any save files you've created.
 
 (The idea is that one group of players might log in on Tuesdays to play game X, while another group is playing game Y on Thursdays. You just have to **/select** your game session when you arrive in the channel. You will be back in your game, exactly where you left off.)
+
+(Yes, you can have two sessions playing the same game. In case the Tuesday and Thursday crowds have similar tastes. Each session is its own "save slot".)
 
 Sessions and games not played for thirty days will be discarded.
 
