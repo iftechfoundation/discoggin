@@ -64,6 +64,10 @@ pat_alldots = re.compile('^[.]*$')
 download_nonce = 1
 
 async def download_game_url(app, url):
+    """Download a game and install it in gamesdir.
+    On success, return a GameFile. On error, return a string describing
+    the error. (Sorry, that's messy. Pretend it's a Result sort of thing.)
+    """
     global download_nonce
     
     logging.info('Requested download: %s', url)
@@ -109,19 +113,21 @@ async def download_game_url(app, url):
         return 'Format not recognized: %s' % (url,)
 
     ### this would be a great place to pull ifiction from blorbs
+    ### and unpack resources, too
     logging.info('Downloaded %s (hash %s, format %s)', url, hash, format)
 
     finaldir = os.path.join(app.gamesdir, hash)
     finalpath = os.path.join(app.gamesdir, hash, filename)
 
     tup = (hash, filename, url, format)
+    game = GameFile(*tup)
     curs.execute('INSERT INTO games (hash, filename, url, format) VALUES (?, ?, ?, ?)', tup)
 
     if not os.path.exists(finaldir):
         os.mkdir(finaldir)
     os.rename(tmppath, finalpath)
 
-    return 'Downloaded: %s\n(**/select %s** to begin playing)' % (url, filename,)
+    return game
 
 def detect_format(path, filename):
     _, ext = os.path.splitext(filename)

@@ -10,6 +10,7 @@ import discord
 import discord.app_commands
 
 from .markup import extract_command, content_to_markup, rebalance_output, escape
+from .games import GameFile
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
@@ -194,13 +195,28 @@ class DiscogClient(discord.Client):
 
     @appcmd('install', description='Download and install a game file for play')
     async def on_cmd_install(self, interaction, url:str):
+        playchan = get_valid_playchannel(self, interaction=interaction)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        
         try:
-            msg = await download_game_url(self, url)
-            await interaction.response.send_message(msg)
-            ### also select it, if we're in a game channel?
+            res = await download_game_url(self, url)
         except Exception as ex:
             logging.error('Download: %s', ex, exc_info=ex)
             await interaction.response.send_message('Download error: %s' % (ex,))
+        if isinstance(res, str):
+            await interaction.response.send_message(res)
+            return
+        
+        game = res
+        if not isinstance(res, GameFile):
+            await interaction.response.send_message('download_game_url: not a game')
+            return
+
+        session = create_session(self, game)
+        set_channel_session(self, playchan, session)
+        await interaction.response.send_message('Downloaded "%s" and began a new session. (**/start** to start the game.)' % (game.filename,))
 
     @appcmd('games', description='List downloaded games')
     async def on_cmd_gamelist(self, interaction):
