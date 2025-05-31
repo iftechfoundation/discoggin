@@ -20,16 +20,16 @@ Sessions and games not played for thirty days will be discarded.
 
 Discoggin is controlled with the usual sort of Discord slash commands.
 
-- /install URL : Download and install a game for play.
-- /games : List games available for play.
-- /sessions : List game sessions in progress.
-- /select GAME : Select a game to play in this channel. (This looks for an existing session of that game, or starts a new session.)
-- /select SESSION : Select an existing session.
-- /newsession GAME : Explicitly start a new session for the named game.
-- /start : Begin the selected game in this channel.
-- /status : Display the current status line of a game.
-- /files : List save files (and other data files) recorded in this session.
-- /forcequit : Shut down a game if it's gotten stuck for some reason. (You will then need to /start it again.)
+- **/install** _URL_ : Download and install a game for play.
+- **/games** : List games available for play.
+- **/sessions** : List game sessions in progress.
+- **/select** _GAME_ : Select a game to play in this channel. (This looks for an existing session of that game, or starts a new session.)
+- **/select** _SESSION_ : Select an existing session.
+- **/newsession** _GAME_ : Explicitly start a new session for the named game.
+- **/start** : Begin the selected game in this channel.
+- **/status** : Display the current status line of a game.
+- **/files** : List save files (and other data files) recorded in this session.
+- **/forcequit** : Shut down a game if it's gotten stuck for some reason. (You will then need to **/start** it again.)
 
 ## Under the hood
 
