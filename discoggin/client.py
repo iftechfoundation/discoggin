@@ -148,7 +148,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('The game is not running.')
             return
         put_glkstate_for_session(self, playchan.session, None)
-        await interaction.response.send_message('Game has been stopped.')
+        await interaction.response.send_message('Game has been stopped. (**/start** to restart it.)')
 
     @appcmd('files', description='List the save files for the current session')
     async def on_cmd_listfiles(self, interaction):
