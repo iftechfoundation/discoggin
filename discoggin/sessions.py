@@ -146,6 +146,13 @@ def set_channel_session(app, playchan, session):
     curs = app.db.cursor()
     curs.execute('UPDATE channels SET sessid = ? WHERE gckey = ?', (session.sessid, playchan.gckey,))
 
+def update_session_movecount(app, session, movecount=None):
+    if movecount is None:
+        movecount = session.movecount + 1
+    curs = app.db.cursor()
+    lastupdate = int(time.time())
+    curs.execute('UPDATE sessions SET movecount = ?, lastupdate = ? WHERE sessid = ?', (movecount, lastupdate, session.sessid,))
+    
 
 
 # Late imports

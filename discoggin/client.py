@@ -12,7 +12,7 @@ import discord.app_commands
 from .markup import extract_command, content_to_markup, rebalance_output, escape
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
-from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session
+from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
 from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
@@ -443,6 +443,8 @@ class DiscogClient(discord.Client):
 
         ### detect game-over condition and set glkstate to None!
         put_glkstate_for_session(self, playchan.session, glkstate)
+
+        update_session_movecount(self, playchan.session)
 
         # Display the output.
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
