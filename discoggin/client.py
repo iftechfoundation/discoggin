@@ -278,6 +278,7 @@ class DiscogClient(discord.Client):
                 await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
                 return
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
+            ### display status line?
             return
             
         game = get_game_by_name(self, gamearg)
@@ -293,6 +294,7 @@ class DiscogClient(discord.Client):
         if session:
             set_channel_session(self, playchan, session)
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
+            ### display status line?
             return
         session = create_session(self, game)
         set_channel_session(self, playchan, session)
