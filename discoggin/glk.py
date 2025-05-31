@@ -204,7 +204,9 @@ class GlkState:
                 'window':self.lineinputwin, 'value':cmd
             }
         if self.charinputwin:
-            ### adjust cmd for special cases? arrow keys?
+            if cmd == 'space':
+                cmd = ' '
+            ### other special cases?
             return {
                 'type':'char', 'gen':self.generation,
                 'window':self.charinputwin, 'value':cmd
