@@ -344,7 +344,7 @@ class DiscogClient(discord.Client):
             logging.error('run_turn: game file not found: %s', gamefile)
             await message.channel.send('Error: The game file seems to be missing.')
             return
-            
+
         if playchan.game.format == 'zcode':
             interpreter = 'bocfelr'
         elif playchan.game.format == 'glulx':
@@ -386,7 +386,7 @@ class DiscogClient(discord.Client):
                 return
                 
             try:
-                input = glkstate.construct_input(cmd, savefiledir)
+                input = glkstate.construct_input(cmd)
                 indat = json.dumps(input)
             except Exception as ex:
                 await chan.send('Unable to construct input: %s' % (ex,))
@@ -402,6 +402,7 @@ class DiscogClient(discord.Client):
         try:
             proc = await asyncio.create_subprocess_exec(
                 *args,
+                cwd=savefiledir,
                 stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
             ### timeout? wrap with asyncio.wait_for()
             (outdat, errdat) = await proc.communicate((indat+'\n').encode())
