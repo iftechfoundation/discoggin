@@ -275,10 +275,13 @@ def parse_json(val):
     deals with that situation; it returns (update, errorlist).
     The errorlist is a list of strings (the "message" part of the error
     stanza).
+    If there is no non-error stanza, update will be None.
     Can raise JSONDecodeError for genuinely malformed JSON.
+    Note that the empty string (or whitespace) will return (None, []),
+    rather than raising JSONDecodeError.
     """
     try:
-        # The simple case
+        # The simple case: correct JSON.
         obj = json.loads(val)
         if obj.get('type') == 'error':
             msg = obj.get('message', '???')
@@ -286,7 +289,9 @@ def parse_json(val):
         return (obj, [])
     except:
         pass
-    
+
+    # Assume this is a sequence of newline-separated JSON stanzas; try
+    # to decode that.
     objls = []
     errls = []
     val = val.strip()
