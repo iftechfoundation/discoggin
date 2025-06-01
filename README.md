@@ -8,8 +8,6 @@
 
 Discoggin (the name doesn't mean anything) allows players to run old-style interactive fiction games in a Discord channel. You play by typing commands like `>GET LAMP` as regular Discord chat messages. The initial `>` indicates a game command. The bot will carry out the command and respond with the game's output.
 
-At present, Discoggin can only play Glulx games (file suffix `.ulx` or `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks.
-
 Discoggin is configured to run on specific Discord channels, which are assumed to be dedicated to playing IF. (Non-players can mute the those channels.) It can only play one game at a time per channel, but it can keep any number of game sessions paused in the background. A "session" is a particular game along with its current state and any save files you've created.
 
 (The idea is that one group of players might log in on Tuesdays to play game X, while another group is playing game Y on Thursdays. You just have to **/select** your game session when you arrive in the channel. You will be back in your game, exactly where you left off.)
@@ -17,6 +15,14 @@ Discoggin is configured to run on specific Discord channels, which are assumed t
 (Yes, you can have two sessions playing the same game. In case the Tuesday and Thursday crowds have similar tastes. Each session is its own "save slot".)
 
 Sessions and games not played for thirty days will be discarded.
+
+## Limitations
+
+At present, Discoggin can only play Glulx games (file suffix `.ulx` or `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks.
+
+`UNDO` is currently not working.
+
+There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
 
 ## Slash commands
 
@@ -37,7 +43,7 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 
 Discoggin uses traditional IF interpreters installed on the bot server. When a player enters a command, the bot fires up the interpreter, loads the last-saved position, passes in the command, saves the position again, and reports the command results on the Discord channel.
 
-The interpreters use an autosave feature, so you never have to explicitly save a game. But if you do, the save file is kept as part of the session data. The same is true of transcripts or other game data files. (Downloading a save file or transcript is a planned future feature.)
+The interpreters use an autosave feature, so you never have to explicitly save a game. But if you do, the save file is kept as part of the session data. The same is true of transcripts or other game data files.
 
 Because the interpreter only runs a single move at a time, there is no RAM or CPU cost associated with a session -- whether the session is active or background. Everything is just files on disk. On the other hand, the server incurs the CPU cost of launching an interpreter every time a command is processed.
 
