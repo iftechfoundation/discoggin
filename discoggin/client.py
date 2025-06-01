@@ -451,6 +451,7 @@ class DiscogClient(discord.Client):
         # The update was a JSON-encoded error.
         if update.get('type') == 'error':
             msg = update.get('message', '???')
+            logging.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
             await chan.send('Interpreter error: %s' % (msg,))
             return
 
