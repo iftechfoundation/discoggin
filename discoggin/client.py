@@ -269,6 +269,7 @@ class DiscogClient(discord.Client):
 
     @appcmd('channels', description='List channels that we can play on')
     async def on_cmd_channellist(self, interaction):
+        ### good place to update the channels cache
         chanls = get_playchannels_for_server(self, interaction.guild_id, withgame=True)
         if not chanls:
             await interaction.response.send_message('Discoggin is not available on this Discord server')
