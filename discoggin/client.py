@@ -351,14 +351,13 @@ class DiscogClient(discord.Client):
         (starting the game).
         """
         ### avoid the case of two in-flight commands in the same session
-        ### log session with log errors
         if not chan:
             logging.warning('run_turn: channel not set')
             return
 
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
-            logging.error('run_turn: game file not found: %s', gamefile)
+            logging.error('run_turn (s%s): game file not found: %s', playchan.sessid, gamefile)
             await message.channel.send('Error: The game file seems to be missing.')
             return
 
@@ -367,7 +366,7 @@ class DiscogClient(discord.Client):
         elif playchan.game.format == 'glulx':
             interpreter = 'glulxer'
         else:
-            logging.warning('run_turn: unknown format')
+            logging.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
             await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
             return
         
@@ -385,7 +384,7 @@ class DiscogClient(discord.Client):
         if glkstate is None:
             # Game-start case.
             if cmd is not None:
-                logging.warning('Tried to send command when game was not running: %s', cmd)
+                logging.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
                 return
             
             update = {
@@ -399,7 +398,7 @@ class DiscogClient(discord.Client):
         else:
             # Regular turn case.
             if cmd is None:
-                logging.warning('Tried to send no command when game was running')
+                logging.warning('run_turn (s%s): tried to send no command when game was running', playchan.sessid)
                 return
                 
             try:
@@ -425,11 +424,11 @@ class DiscogClient(discord.Client):
                 return await proc.communicate((indat+'\n').encode())
             (outdat, errdat) = await asyncio.wait_for(func(), 5)
         except TimeoutError:
-            logging.error('Interpreter error: Command timed out')
+            logging.error('Interpreter error (s%s): Command timed out', playchan.sessid)
             await chan.send('Interpreter error: Command timed out.')
             return
         except Exception as ex:
-            logging.error('Interpreter exception: %s', ex, exc_info=ex)
+            logging.error('Interpreter exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
             await chan.send('Interpreter exception: %s' % (ex,))
             return
             
@@ -445,7 +444,7 @@ class DiscogClient(discord.Client):
                 outstr = outdat.decode()
             except:
                 outstr = str(outdat)
-            logging.error('Invalid JSON output: %r', outstr)
+            logging.error('Invalid JSON output (s%s): %r', playchan.sessid, outstr)
             await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
 
