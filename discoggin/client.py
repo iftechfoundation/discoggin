@@ -14,7 +14,7 @@ from .games import GameFile
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
-from .sessions import get_playchannels, get_valid_playchannel, get_playchannel_for_session
+from .sessions import get_playchannels, get_playchannels_for_server, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 
@@ -266,7 +266,20 @@ class DiscogClient(discord.Client):
         val = '\n'.join(ls)
         ### is there a message size limit here?
         await interaction.response.send_message(val)
-                
+
+    @appcmd('channels', description='List channels that we can play on')
+    async def on_cmd_channellist(self, interaction):
+        chanls = get_playchannels_for_server(self, interaction.guild_id)
+        if not chanls:
+            await interaction.response.send_message('Discoggin is not available on this Discord server')
+            return
+        ls = []
+        for playchan in chanls:
+            ls.append('- <#%s>' % (playchan.chanid,))
+        val = '\n'.join(ls)
+        ### is there a message size limit here?
+        await interaction.response.send_message(val)
+        
     @appcmd('newsession', description='Start a new game session in this channel')
     async def on_cmd_newsession(self, interaction, game:str):
         gamearg = game

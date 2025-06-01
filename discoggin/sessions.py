@@ -85,6 +85,12 @@ def get_playchannels(app):
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
     return chanls
 
+def get_playchannels_for_server(app, gid):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM channels WHERE gid = ?', (str(gid),))
+    chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
+    return chanls
+
 def get_playchannel(app, gckey):
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels WHERE gckey = ?', (gckey,))
