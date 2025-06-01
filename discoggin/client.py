@@ -367,7 +367,6 @@ class DiscogClient(discord.Client):
         The cmd and glkstate arguments should be None for the initial turn
         (starting the game).
         """
-        ### avoid the case of two in-flight commands in the same session
         if not chan:
             logging.warning('run_turn: channel not set')
             return
