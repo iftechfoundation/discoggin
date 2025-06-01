@@ -16,6 +16,7 @@ from .games import download_game_url
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
 from .sessions import get_playchannels, get_playchannels_for_server, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
+from .glk import parse_json
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 
 _appcmds = []
@@ -473,9 +474,8 @@ class DiscogClient(discord.Client):
             # but try to continue
 
         try:
-            update = json.loads(outdat)
-            ### Allow for the case of an error stanza followed by an update stanza. (This can apparently happen.) Display the error but continue with the update.
-        except:
+            (update, errorls) = parse_json(outdat)
+        except json.JSONDecodeError:
             try:
                 outstr = outdat.decode()
             except:
@@ -483,12 +483,22 @@ class DiscogClient(discord.Client):
             logging.error('Invalid JSON output (s%s): %r', playchan.sessid, outstr)
             await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
+        except Exception as ex:
+            logging.error('JSON decode exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
+            await chan.send('JSON decode exception: %s' % (ex,))
 
-        # The update was a JSON-encoded error.
-        if update.get('type') == 'error':
-            msg = update.get('message', '???')
+        # Display errorls, which contains the contents of JSON-encoded
+        # error stanza(s). But don't exit just because got errors.
+        for msg in errorls:
             logging.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
             await chan.send('Interpreter error: %s' % (msg,))
+
+        if update is None:
+            # If we didn't get any *non*-errors, that's a reason to exit.
+            # But make sure we report at least one error.
+            if not errorls:
+                logging.error('Interpreter error (s%s): no update', playchan.sessid)
+                await chan.send('Interpreter error: no update')
             return
 
         # Update glkstate with the output.

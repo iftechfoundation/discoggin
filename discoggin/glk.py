@@ -298,7 +298,7 @@ def parse_json(val):
     while val:
         start = 0
         while True:
-            pos = val.find('\n', start)
+            pos = val.find(b'\n', start)
             if pos < 0:
                 obj = json.loads(val)
                 pos = len(val)
