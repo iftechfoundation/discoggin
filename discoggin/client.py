@@ -46,6 +46,8 @@ class DiscogClient(discord.Client):
 
         super().__init__(intents=intents)
 
+        self.inflight = set()  # of session ids
+
         # Container for slash commands.
         self.tree = discord.app_commands.CommandTree(self)
 
@@ -133,7 +135,15 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('The game is already running.')
             return
         await interaction.response.send_message('Game is starting...')
-        await self.run_turn(None, interaction.channel, playchan, glkstate)
+        
+        if playchan.sessid in self.inflight:
+            logging.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            return
+        self.inflight.add(playchan.sessid)
+        try:
+            await self.run_turn(None, interaction.channel, playchan, None)
+        finally:
+            self.inflight.discard(playchan.sessid)
     
     @appcmd('forcequit', description='Force the current game to end')
     async def on_cmd_stop(self, interaction):
@@ -342,8 +352,15 @@ class DiscogClient(discord.Client):
         if glkstate is None:
             await message.channel.send('The game is not running. (**/start** to start it.)')
             return
-        
-        await self.run_turn(cmd, message.channel, playchan, glkstate)
+
+        if playchan.sessid in self.inflight:
+            logging.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            return
+        self.inflight.add(playchan.sessid)
+        try:
+            await self.run_turn(cmd, message.channel, playchan, glkstate)
+        finally:
+            self.inflight.discard(playchan.sessid)
 
     async def run_turn(self, cmd, chan, playchan, glkstate):
         """Execute a turn by invoking an interpreter.
