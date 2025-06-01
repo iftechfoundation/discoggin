@@ -366,6 +366,9 @@ class DiscogClient(discord.Client):
         """Execute a turn by invoking an interpreter.
         The cmd and glkstate arguments should be None for the initial turn
         (starting the game).
+        We always set sessid in the inflight set before calling this,
+        and clear it after this completes. This lets us avoid invoking
+        two turns on the same session at the same time.
         """
         if not chan:
             logging.warning('run_turn: channel not set')
