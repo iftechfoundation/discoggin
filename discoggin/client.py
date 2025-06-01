@@ -491,7 +491,11 @@ class DiscogClient(discord.Client):
         # error stanza(s). But don't exit just because got errors.
         for msg in errorls:
             logging.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
-            await chan.send('Interpreter error: %s' % (msg,))
+        outls = [ 'Interpreter error: %s' % (msg,) for msg in errorls ]
+        outls = rebalance_output(outls)
+        for out in outls:
+            if out.strip():
+                await chan.send(out)
 
         if update is None:
             # If we didn't get any *non*-errors, that's a reason to exit.
