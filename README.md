@@ -30,6 +30,7 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 
 - **/install** _URL_ : Download and install a game for play.
 - **/games** : List games available for play.
+- **/channels** : List channels available to play on.
 - **/sessions** : List game sessions in progress.
 - **/select** _GAME_ : Select a game to play in this channel. (This looks for an existing session of that game, or starts a new session.)
 - **/select** _SESSION_ : Select an existing session.

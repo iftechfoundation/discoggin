@@ -269,13 +269,16 @@ class DiscogClient(discord.Client):
 
     @appcmd('channels', description='List channels that we can play on')
     async def on_cmd_channellist(self, interaction):
-        chanls = get_playchannels_for_server(self, interaction.guild_id)
+        chanls = get_playchannels_for_server(self, interaction.guild_id, withgame=True)
         if not chanls:
             await interaction.response.send_message('Discoggin is not available on this Discord server')
             return
         ls = []
         for playchan in chanls:
-            ls.append('- <#%s>' % (playchan.chanid,))
+            gamestr = ''
+            if playchan.game:
+                gamestr = ': %s, %d moves, <t:%s:f>' % (playchan.game.filename, playchan.session.movecount, playchan.session.lastupdate,)
+            ls.append('- <#%s>%s' % (playchan.chanid, gamestr))
         val = '\n'.join(ls)
         ### is there a message size limit here?
         await interaction.response.send_message(val)

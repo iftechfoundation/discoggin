@@ -85,10 +85,16 @@ def get_playchannels(app):
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
     return chanls
 
-def get_playchannels_for_server(app, gid):
+def get_playchannels_for_server(app, gid, withgame=False):
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels WHERE gid = ?', (str(gid),))
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
+    if withgame:
+        for playchan in chanls:
+            if playchan.sessid:
+                playchan.session = get_session_by_id(app, playchan.sessid)
+                if playchan.session and playchan.session.hash:
+                    playchan.game = get_game_by_hash(app, playchan.session.hash)
     return chanls
 
 def get_playchannel(app, gckey):
