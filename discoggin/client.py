@@ -351,6 +351,7 @@ class DiscogClient(discord.Client):
         (starting the game).
         """
         ### avoid the case of two in-flight commands in the same session
+        ### log session with log errors
         if not chan:
             logging.warning('run_turn: channel not set')
             return
@@ -416,12 +417,17 @@ class DiscogClient(discord.Client):
         # Launch the interpreter, push an input event into it, and then pull
         # an update out.
         try:
-            proc = await asyncio.create_subprocess_exec(
-                *args,
-                cwd=savefiledir,
-                stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-            ### timeout? wrap with asyncio.wait_for()
-            (outdat, errdat) = await proc.communicate((indat+'\n').encode())
+            async def func():
+                proc = await asyncio.create_subprocess_exec(
+                    *args,
+                    cwd=savefiledir,
+                    stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+                return await proc.communicate((indat+'\n').encode())
+            (outdat, errdat) = await asyncio.wait_for(func(), 5)
+        except TimeoutError:
+            logging.error('Interpreter error: Command timed out')
+            await chan.send('Interpreter error: Command timed out.')
+            return
         except Exception as ex:
             logging.error('Interpreter exception: %s', ex, exc_info=ex)
             await chan.send('Interpreter exception: %s' % (ex,))
