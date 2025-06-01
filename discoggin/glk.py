@@ -268,6 +268,55 @@ def extract_raw(line):
             ### hyperlink
     return res
 
+def parse_json(val):
+    """Normally an interpreter returns a single JSON update stanza.
+    However, errors aren't always tidy. We might get one or more error
+    stanzas (type="error") in addition to the result. This function
+    deals with that situation; it returns (update, errorlist).
+    The errorlist is a list of strings (the "message" part of the error
+    stanza).
+    Can raise JSONDecodeError for genuinely malformed JSON.
+    """
+    try:
+        # The simple case
+        obj = json.loads(val)
+        if obj.get('type') == 'error':
+            msg = obj.get('message', '???')
+            return (None, [ msg ])
+        return (obj, [])
+    except:
+        pass
+    
+    objls = []
+    errls = []
+    val = val.strip()
+    while val:
+        start = 0
+        while True:
+            pos = val.find('\n', start)
+            if pos < 0:
+                obj = json.loads(val)
+                pos = len(val)
+                break
+            try:
+                obj = json.loads(val[ : pos ])
+                break
+            except:
+                start = pos+1
+                continue
+        val = val[ pos : ].strip()
+        if obj.get('type') == 'error':
+            msg = obj.get('message', '???')
+            errls.append(msg)
+        else:
+            objls.append(obj)
+    if not objls:
+        return (None, errls)
+    if len(objls) == 1:
+        return (objls[0], errls)
+    errls.append('parse_json: more than one non-error result; discarding extras')
+    return (objls[0], errls)
+
 def sanitize_filename(val):
     """Make sure a filename isn't going to bounce into a different
     directory.
