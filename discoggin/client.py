@@ -527,3 +527,7 @@ class DiscogClient(discord.Client):
             if out.strip():
                 await chan.send('>\n'+out)
         ### otherwise show status line? or something?
+
+        if glkstate.exited:
+            await chan.send('The game has exited. (**/start** to restart it.)')
+            
