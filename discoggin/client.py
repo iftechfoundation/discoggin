@@ -202,8 +202,7 @@ class DiscogClient(discord.Client):
         outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
         outls = rebalance_output(outls)
         for out in outls:
-            if out.strip():
-                await chan.send('|\n'+out)
+            await chan.send('|\n'+out)
 
     @appcmd('install', description='Download and install a game file for play')
     async def on_cmd_install(self, interaction, url:str):
@@ -498,8 +497,7 @@ class DiscogClient(discord.Client):
         outls = [ 'Interpreter error: %s' % (msg,) for msg in errorls ]
         outls = rebalance_output(outls)
         for out in outls:
-            if out.strip():
-                await chan.send(out)
+            await chan.send(out)
 
         if update is None:
             # If we didn't get any *non*-errors, that's a reason to exit.
@@ -523,10 +521,21 @@ class DiscogClient(discord.Client):
         # Display the output.
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
         outls = rebalance_output(outls)
+        printcount = 0
         for out in outls:
-            if out.strip():
-                await chan.send('>\n'+out)
-        ### otherwise show status line? or something?
+            printcount += len(out)
+            await chan.send('>\n'+out)
+
+        if printcount <= 4:
+            # No story output, or not much. Try showing the status line.
+            outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+            outls = rebalance_output(outls)
+            for out in outls:
+                printcount += len(out)
+                await chan.send('|\n'+out)
+
+        if printcount <= 4:
+            await chan.send('(no game output)')
 
         if glkstate.exited:
             await chan.send('The game has exited. (**/start** to restart it.)')

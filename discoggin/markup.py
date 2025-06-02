@@ -84,4 +84,9 @@ def rebalance_output(ls):
     if cur:
         res.append(cur)
         cur = None
+
+    # Make sure no completely blank or whitespace lines remain.
+    # (Discord doesn't like to print those.)
+    res = [ val.rstrip() for val in res ]
+    res = [ val for val in res if val ]
     return res
