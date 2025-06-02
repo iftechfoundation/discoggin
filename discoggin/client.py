@@ -132,7 +132,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('No game is being played in this channel.')
             return
         glkstate = get_glkstate_for_session(self, playchan.session)
-        if glkstate is not None:
+        if glkstate and glkstate.islive():
             await interaction.response.send_message('The game is already running.')
             return
         await interaction.response.send_message('Game is starting...')
@@ -156,7 +156,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('No game is being played in this channel.')
             return
         glkstate = get_glkstate_for_session(self, playchan.session)
-        if glkstate is None:
+        if glkstate is None or not glkstate.islive():
             await interaction.response.send_message('The game is not running.')
             return
         put_glkstate_for_session(self, playchan.session, None)
@@ -194,6 +194,7 @@ class DiscogClient(discord.Client):
             return
         glkstate = get_glkstate_for_session(self, playchan.session)
         if glkstate is None:
+            # Actually we can view the status line of an exited game.
             await interaction.response.send_message('The game is not running.')
             return
         chan = interaction.channel
@@ -367,7 +368,7 @@ class DiscogClient(discord.Client):
             return
         
         glkstate = get_glkstate_for_session(self, playchan.session)
-        if glkstate is None:
+        if glkstate is None or not glkstate.islive():
             await message.channel.send('The game is not running. (**/start** to start it.)')
             return
 
@@ -418,12 +419,15 @@ class DiscogClient(discord.Client):
         input = None
         extrainput = None
         
-        if glkstate is None:
+        if glkstate is None or not glkstate.islive():
             # Game-start case.
             if cmd is not None:
                 logging.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
                 return
-            
+
+            # Fresh state.
+            glkstate = GlkState()
+
             update = {
                 'type':'init', 'gen':0,
                 'metrics': create_metrics(),
@@ -506,15 +510,12 @@ class DiscogClient(discord.Client):
             return
 
         # Update glkstate with the output.
-        if glkstate is None:
-            glkstate = GlkState()
         try:
             glkstate.accept_update(update, extrainput)
         except Exception as ex:
             await chan.send('Update error: %s' % (ex,))
             return
 
-        ### detect game-over condition and set glkstate to None!
         put_glkstate_for_session(self, playchan.session, glkstate)
 
         update_session_movecount(self, playchan.session)

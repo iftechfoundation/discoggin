@@ -32,7 +32,7 @@ def put_glkstate_for_session(app, session, state):
             json.dump(obj, fl)
 
 class GlkState:
-    _singleton_keys = [ 'generation', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]
+    _singleton_keys = [ 'generation', 'exited', 'lineinputwin', 'charinputwin', 'specialinput', 'hyperlinkinputwin' ]
     _contentlist_keys = [ 'statuswindat', 'storywindat', 'graphicswindat' ]
     
     def __init__(self):
@@ -50,6 +50,7 @@ class GlkState:
         self.charinputwin = None
         self.specialinput = None
         self.hyperlinkinputwin = None
+        self.exited = False
         self.generation = 0
 
     def to_jsonable(self):
@@ -68,6 +69,9 @@ class GlkState:
         obj['statuslinestarts'] = strkeydict(self.statuslinestarts)
         obj['windows'] = strkeydict(self.windows)
         return obj
+
+    def islive(self):
+        return not self.exited
 
     @staticmethod
     def from_jsonable(obj):
@@ -90,6 +94,7 @@ class GlkState:
         http://eblong.com/zarf/glk/glkote/docs.html
         """
         self.generation = update.get('gen')
+        self.exited = update.get('exit', False)
 
         windows = update.get('windows')
         if windows is not None:
