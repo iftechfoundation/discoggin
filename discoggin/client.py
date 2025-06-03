@@ -333,11 +333,19 @@ class DiscogClient(discord.Client):
         if session:
             set_channel_session(self, playchan, session)
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
-            ### display status line?
+            # Display the status line of this session
+            glkstate = get_glkstate_for_session(self, session)
+            if glkstate:
+                chan = interaction.channel
+                outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+                outls = rebalance_output(outls)
+                for out in outls:
+                    await chan.send('|\n'+out)
             return
         session = create_session(self, game)
         set_channel_session(self, playchan, session)
         await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
+        # No status line, game hasn't started yet
         
     async def on_message(self, message):
         """Event handler for regular Discord chat messages.
