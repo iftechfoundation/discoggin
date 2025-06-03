@@ -3,8 +3,9 @@ import json
 import logging
 
 def get_glkstate_for_session(app, session):
-    """Load the GlkState for a session, or None if the session is not
-    running.
+    """Load the GlkState for a session. An exited session will return a
+    GlkState with exit=True. If the game has never run at all (or has
+    been force-quit), this returns None.
     """
     path = os.path.join(app.autosavedir, session.autosave, 'glkstate.json')
     if not os.path.exists(path):
