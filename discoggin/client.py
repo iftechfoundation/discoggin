@@ -145,8 +145,8 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('The game is not running.')
             return
         # We delete the GlkState entirely, rather than messing with the
-        # exit flag. This lets us recover from a corrupted GlkState
-        # entry.
+        # exit flag. This lets us recover from a corrupted GlkState or
+        # autosave entry.
         put_glkstate_for_session(self, playchan.session, None)
         await interaction.response.send_message('Game has been stopped. (**/start** to restart it.)')
 
