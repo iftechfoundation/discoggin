@@ -38,10 +38,13 @@ class DiscogClient(discord.Client):
         self.config = config
         self.cmdsync = cmdsync
 
-        self.autosavedir = config['DEFAULT']['AutoSaveDir']
-        self.savefiledir = config['DEFAULT']['SaveFileDir']
-        self.gamesdir = config['DEFAULT']['GamesDir']
         self.dbfile = config['DEFAULT']['DBFile']
+        
+        # These are absolutized because we will pass them to the interpreter,
+        # which runs in a subdirectory.
+        self.autosavedir = os.path.abspath(config['DEFAULT']['AutoSaveDir'])
+        self.savefiledir = os.path.abspath(config['DEFAULT']['SaveFileDir'])
+        self.gamesdir = os.path.abspath(config['DEFAULT']['GamesDir'])
         
         intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True, message_content=True)
 
