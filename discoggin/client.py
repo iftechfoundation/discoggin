@@ -99,21 +99,6 @@ class DiscogClient(discord.Client):
             
         await super().close()
         
-    def launch_coroutine(self, coro, label='task'):
-        """Convenience function to begin an asynchronous task and report
-        any exception that occurs. This returns a task object. (You might
-        want to cancel it later.)
-        """
-        task = self.loop.create_task(coro)
-        def callback(future):
-            if future.cancelled():
-                return
-            ex = future.exception()
-            if ex is not None:
-                logging.error('%s: %s', label, ex, exc_info=ex)
-        task.add_done_callback(callback)
-        return task
-
     async def on_ready(self):
         """We have finished connecting to Discord.
         (Docs recommend against doing Discord API calls from here.)
