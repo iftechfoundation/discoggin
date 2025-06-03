@@ -310,7 +310,14 @@ class DiscogClient(discord.Client):
                 await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
                 return
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
-            ### display status line?
+            # Display the status line of this session
+            glkstate = get_glkstate_for_session(self, session)
+            if glkstate:
+                chan = interaction.channel
+                outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+                outls = rebalance_output(outls)
+                for out in outls:
+                    await chan.send('|\n'+out)
             return
             
         game = get_game_by_name(self, gamearg)
