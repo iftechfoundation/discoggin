@@ -40,13 +40,15 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 - **/files** : List save files (and other data files) recorded in this session.
 - **/forcequit** : Shut down a game if it's gotten stuck for some reason. (You will then need to **/start** it again.)
 
+Sessions are referred to by number. Games are referred to by filename, or part of the filename. (**/select scroll** will suffice to find `Scroll_Thief.gblorb`, if it's installed.)
+
 ## Under the hood
 
 Discoggin uses traditional IF interpreters installed on the bot server. When a player enters a command, the bot fires up the interpreter, loads the last-saved position, passes in the command, saves the position again, and reports the command results on the Discord channel.
 
 The interpreters use an autosave feature, so you never have to explicitly save a game. But if you do, the save file is kept as part of the session data. The same is true of transcripts or other game data files.
 
-Because the interpreter only runs a single move at a time, there is no RAM or CPU cost associated with a session -- whether the session is active or background. Everything is just files on disk. On the other hand, the server incurs the CPU cost of launching an interpreter every time a command is processed.
+Because the interpreter only runs a single move at a time, there is no RAM or CPU cost associated with a session -- whether the session is active or background. Nothing is cached in memory; it's all files on disk. On the down side, the server incurs the CPU cost of launching an interpreter every time a command is processed.
 
 Getting even deeper: the interpreters all use the [RemGlk][] library, which translates the standard IF interface (story and status windows) into a stream of JSON updates. The Discoggin bot therefore just has to launch the interpreter as a subprocess (with the `--singleturn` option), and pass JSON in and out.
 
