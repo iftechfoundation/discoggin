@@ -286,7 +286,8 @@ class DiscogClient(discord.Client):
             return
         session = create_session(self, game)
         set_channel_session(self, playchan, session)
-        await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
+        await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
+        # No status line, game hasn't started yet
         
     @appcmd('select', description='Select a game or session to play in this channel')
     async def on_cmd_select(self, interaction, game:str):
@@ -344,7 +345,7 @@ class DiscogClient(discord.Client):
             return
         session = create_session(self, game)
         set_channel_session(self, playchan, session)
-        await interaction.response.send_message('Began a new session for "%s"' % (game.filename,))
+        await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
         
     async def on_message(self, message):
