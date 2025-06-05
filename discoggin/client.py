@@ -13,6 +13,7 @@ from .markup import extract_command, content_to_markup, rebalance_output, escape
 from .games import GameFile
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
+from .games import format_interpreter_args
 from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
 from .sessions import get_playchannels, get_playchannels_for_server, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
@@ -399,21 +400,14 @@ class DiscogClient(discord.Client):
             logging.warning('run_turn: channel not set')
             return
 
+        firsttime = (glkstate is None or not glkstate.islive())
+
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
             logging.error('run_turn (s%s): game file not found: %s', playchan.sessid, gamefile)
             await message.channel.send('Error: The game file seems to be missing.')
             return
 
-        if playchan.game.format == 'zcode':
-            interpreter = 'bocfelr'
-        elif playchan.game.format == 'glulx':
-            interpreter = 'glulxer'
-        else:
-            logging.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
-            await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
-            return
-        
         autosavedir = os.path.join(self.autosavedir, playchan.session.autosave)
         if not os.path.exists(autosavedir):
             os.mkdir(autosavedir)
@@ -422,10 +416,21 @@ class DiscogClient(discord.Client):
         if not os.path.exists(savefiledir):
             os.mkdir(savefiledir)
 
+        iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, gamefile=gamefile, autosavedir=autosavedir)
+        if iargs is None:
+            logging.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
+            await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
+            return
+
+        # Inherit env vars
+        allenv = os.environ.copy()
+        if ienv:
+            allenv.update(ienv)
+        
         input = None
         extrainput = None
         
-        if glkstate is None or not glkstate.islive():
+        if firsttime:
             # Game-start case.
             if cmd is not None:
                 logging.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
@@ -440,8 +445,6 @@ class DiscogClient(discord.Client):
                 'support': [ 'timer', 'hyperlinks' ],
             }
             indat = json.dumps(update)
-            
-            args = [ interpreter, '-singleturn', '--autosave', '--autodir', autosavedir, gamefile ]
         else:
             # Regular turn case.
             if cmd is None:
@@ -457,15 +460,14 @@ class DiscogClient(discord.Client):
 
             if input.get('type') == 'specialresponse' and input.get('response') == 'fileref_prompt':
                 extrainput = cmd
-            
-            args = [ interpreter, '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
 
         # Launch the interpreter, push an input event into it, and then pull
         # an update out.
         try:
             async def func():
                 proc = await asyncio.create_subprocess_exec(
-                    *args,
+                    *iargs,
+                    env=allenv,
                     cwd=savefiledir,
                     stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
                 return await proc.communicate((indat+'\n').encode())

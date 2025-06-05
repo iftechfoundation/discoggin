@@ -166,7 +166,7 @@ def format_interpreter_args(format, firstrun, *, gamefile, autosavedir):
             args = [ 'bocfelr', '-C', '-H', '-m', '-singleturn', '-autometrics', gamefile ]
         return (args, env)
         
-    return None
+    return (None, None)
         
 
 # Late imports
