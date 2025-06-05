@@ -18,9 +18,13 @@ Sessions and games not played for thirty days will be discarded.
 
 ## Limitations
 
-At present, Discoggin can only play Glulx games (file suffix `.ulx` or `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks.
+There are many. Discoggin is a work in progress.
+
+At present, Discoggin can only play Z-code games (file suffix `.z1` through `.z8` plus `.zblorb`) and Glulx games (file suffix `.ulx` and `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks. (So `.z6` is not actually going to work.)
 
 `UNDO` is currently not working.
+
+The status line is broken on Z-code games. (Gets stuck on the first turn or blank.)
 
 There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
 
