@@ -139,6 +139,35 @@ def detect_format(path, filename):
         return 'zcode'
     return None
 
+def format_interpreter_args(format, firstrun, *, gamefile, autosavedir):
+    """Return an argument list and environment variables for the interpreter
+    to run the given format.
+    """
+    if format == 'glulx':
+        if firstrun:
+            args = [ 'glulxer', '-singleturn', '--autosave', '--autodir', autosavedir, gamefile ]
+        else:
+            args = [ 'glulxer', '-singleturn', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
+        return (args, {})
+
+    if format == 'zcode':
+        env = {
+            'BOCFEL_AUTOSAVE': '1',
+            'BOCFEL_AUTOSAVE_DIRECTORY': autosavedir,
+            'BOCFEL_AUTOSAVE_LIBRARYSTATE': '1',
+        }
+        # -C is BOCFEL_DISABLE_CONFIG
+        # -H is BOCFEL_DISABLE_HISTORY_PLAYBACK
+        # -m is BOCFEL_DISABLE_META_COMMANDS
+        if firstrun:
+            env['BOCFEL_SKIP_AUTORESTORE'] = '1'
+            args = [ 'bocfelr', '-C', '-H', '-m', '-singleturn', gamefile ]
+        else:
+            args = [ 'bocfelr', '-C', '-H', '-m', '-singleturn', '-autometrics', gamefile ]
+        return (args, env)
+        
+    return None
+        
 
 # Late imports
 from .sessions import get_playchannel, get_session_by_id
