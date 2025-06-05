@@ -95,5 +95,17 @@ Create a venv for the application. (The [discord.py][] library doesn't play well
 
 Make sure the `discoggin` module is in your `$PYTHON_PATH` (or in the venv).
 
-Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don't have detailed instructions for this. It's a pain in the butt. 
+Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don't have detailed instructions for this. It's a pain in the butt. Once you've figured it out, put the `glulxe` and `bocfel` binaries in the `terps` directory.
+
+Activate the bot in your `#game` channel. Use this command, copying in the channel URL from your Discord server:
+
+	./venv/bin/python3 -m discoggin addchannel https://discord.com/channels/12345678/87654321
+
+Now you can run Discoggin:
+
+	./venv/bin/python3 -m discoggin
+
+Log output will be written to `log/bot.log` (or wherever you configured it in `app.config`). If you want to log to stdout, use the `--logstream` option:
+
+	./venv/bin/python3 -m discoggin --logstream
 
