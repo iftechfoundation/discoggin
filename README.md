@@ -58,3 +58,41 @@ Getting even deeper: the interpreters all use the [RemGlk][] library, which tran
 
 [RemGlk]: https://github.com/erkyrath/remglk
 
+## Setting up Discoggin
+
+To run your own installation of Discoggin, you must create a Discord application.
+
+## On Discord's web site
+
+Go to the [Discord developer portal][discorddev] and hit "New Application".
+
+[discorddev]: https://discord.com/developers/applications
+
+On the Installation tab, under "Guild Install", add "application.commands" and "bots" to the Scopes line. Add "Manage Channels", "Manage Messages", "Send Messages", "Use Slash Commands" to the Permissions line.
+
+On the Bot tab, turn on the "Message Content Intent" switch. Create a Bot Token and record its value.
+
+Back on the Installation tab, use the URL under "Install Link" to install the application on your Discord instance. Give it the permissions it asks for.
+
+The Discoggin-IF bot will appear on your server, but it will appear as offline. That's because the bot process isn't running yet.
+
+Create a channel for Discoggin to play games in. For the sake of example, we will call it `#game`.
+
+### On your machine
+
+Set up a directory to hold the bot's files. Create subdirectories:
+
+	mkdir sql games terps autosaves savefiles log
+
+Copy the [`sample.config`](./sample.config) file into your directory and rename it `app.config`.
+
+In `app.config`, change the `BotToken` entry to the token value you recorded above. (If you didn't write down the value, you'll have to reset it -- Discord only shows you the token once.)
+
+Create a venv for the application. (The [discord.py][] library doesn't play well with some other modules, so I prefer to use a venv.)
+
+	python3 -m venv venv
+	./venv/bin/pip3 install -r requirements.txt
+
+Make sure the 
+
+Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don't have detailed instructions for this. It's a pain in the butt. 

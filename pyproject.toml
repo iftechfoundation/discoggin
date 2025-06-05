@@ -1,0 +1,16 @@
+[project]
+name = "discoggin"
+version = "0.1"
+dependencies = [
+  "discord.py~=2.5",
+  "aiohttp>=3.9",
+]
+requires-python = ">=3.8"
+authors = [
+  { name = "Andrew Plotkin", email = "erkyrath@eblong.com" }
+]
+description = "A Discord bot for playing parser IF games"
+license = "MIT"
+
+[project.urls]
+Repository = "https://github.com/iftechfoundation/discoggin.git"
