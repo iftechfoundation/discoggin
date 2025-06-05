@@ -93,6 +93,7 @@ Create a venv for the application. (The [discord.py][] library doesn't play well
 	python3 -m venv venv
 	./venv/bin/pip3 install -r requirements.txt
 
-Make sure the 
+Make sure the `discoggin` module is in your `$PYTHON_PATH` (or in the venv).
 
 Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don't have detailed instructions for this. It's a pain in the butt. 
+

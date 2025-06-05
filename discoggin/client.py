@@ -46,6 +46,7 @@ class DiscogClient(discord.Client):
         self.autosavedir = os.path.abspath(config['DEFAULT']['AutoSaveDir'])
         self.savefiledir = os.path.abspath(config['DEFAULT']['SaveFileDir'])
         self.gamesdir = os.path.abspath(config['DEFAULT']['GamesDir'])
+        self.terpsdir = os.path.abspath(config['DEFAULT']['InterpretersDir'])
         
         intents = discord.Intents(guilds=True, messages=True, guild_messages=True, dm_messages=True, message_content=True)
 
