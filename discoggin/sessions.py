@@ -52,9 +52,15 @@ def get_session_by_id(app, sessid):
         return None
     return Session(*tup)
 
-def get_available_session_for_hash(app, hash):
+def get_sessions_for_server(app, gid):
     curs = app.db.cursor()
-    res = curs.execute('SELECT * FROM sessions WHERE hash = ?', (hash,))
+    res = curs.execute('SELECT * FROM sessions WHERE gid = ?', (gid,))
+    sessls = [ Session(*tup) for tup in res.fetchall() ]
+    return sessls
+    
+def get_available_session_for_hash(app, hash, gid):
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM sessions WHERE hash = ? AND gid = ?', (hash, gid,))
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     
     chanls = get_playchannels(app)
@@ -109,6 +115,8 @@ def get_playchannels_for_server(app, gid, withgame=False):
         for playchan in chanls:
             if playchan.sessid:
                 playchan.session = get_session_by_id(app, playchan.sessid)
+                if playchan.session.gid != gid:
+                    raise Exception('session gid mismatch')
                 if playchan.session and playchan.session.hash:
                     playchan.game = get_game_by_hash(app, playchan.session.hash)
     return chanls

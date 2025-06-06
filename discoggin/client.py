@@ -14,7 +14,7 @@ from .games import GameFile
 from .games import get_gamelist, get_gamemap, get_game_by_name, get_game_by_hash, get_game_by_channel
 from .games import download_game_url
 from .games import format_interpreter_args
-from .sessions import get_sessions, get_session_by_id, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
+from .sessions import get_sessions, get_session_by_id, get_sessions_for_server, get_available_session_for_hash, create_session, set_channel_session, update_session_movecount
 from .sessions import get_playchannels, get_playchannels_for_server, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
 from .glk import parse_json
@@ -237,13 +237,13 @@ class DiscogClient(discord.Client):
                 
     @appcmd('sessions', description='List game sessions')
     async def on_cmd_sessionlist(self, interaction):
-        sessls = get_sessions(self)
+        sessls = get_sessions_for_server(self, interaction.guild_id)
         if not sessls:
             await interaction.response.send_message('No game sessions in progress')
             return
         sessls.sort(key=lambda sess: -sess.lastupdate)
         gamemap = get_gamemap(self)
-        chanls = get_playchannels(self)
+        chanls = get_playchannels_for_server(self, interaction.guild_id)
         chanmap = {}
         for playchan in chanls:
             if playchan.sessid:
@@ -335,7 +335,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('This channel is already playing "%s".' % (curgame.filename,))
             return
             
-        session = get_available_session_for_hash(self, game.hash)
+        session = get_available_session_for_hash(self, game.hash, interaction.guild_id)
         if session:
             set_channel_session(self, playchan, session)
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))

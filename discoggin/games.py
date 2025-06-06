@@ -105,7 +105,7 @@ async def download_game_url(app, url):
     tup = res.fetchone()
     if tup:
         os.remove(tmppath)
-        return 'Game is already installed: %s' % (url,)
+        return 'Game is already installed (try **/select %s**)' % (filename,)
 
     format = detect_format(tmppath, filename)
     if not format:
