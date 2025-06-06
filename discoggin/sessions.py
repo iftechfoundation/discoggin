@@ -2,10 +2,11 @@ import time
 import os, os.path
 
 class Session:
-    def __init__(self, sessid, hash, movecount=0, lastupdate=None):
+    def __init__(self, sessid, gid, hash, movecount=0, lastupdate=None):
         if lastupdate is None:
             lastupdate = int(time.time())
         self.sessid = sessid
+        self.gid = gid
         self.hash = hash
         self.movecount = movecount
         self.lastupdate = lastupdate
@@ -68,7 +69,7 @@ def get_available_session_for_hash(app, hash):
     availls.sort(key=lambda sess: -sess.lastupdate)
     return availls[0]
 
-def create_session(app, game):
+def create_session(app, game, gid):
     curs = app.db.cursor()
     res = curs.execute('SELECT sessid FROM sessions')
     idlist = [ tup[0] for tup in res.fetchall() ]
@@ -76,8 +77,8 @@ def create_session(app, game):
         sessid = 1
     else:
         sessid = 1 + max(idlist)
-    tup = (sessid, game.hash, 0, int(time.time()))
-    curs.execute('INSERT INTO sessions (sessid, hash, movecount, lastupdate) VALUES (?, ?, ?, ?)', tup)
+    tup = (sessid, gid, game.hash, 0, int(time.time()))
+    curs.execute('INSERT INTO sessions (sessid, gid, hash, movecount, lastupdate) VALUES (?, ?, ?, ?, ?)', tup)
     return Session(*tup)
 
 def delete_session(app, sessid):

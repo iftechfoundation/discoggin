@@ -218,7 +218,7 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('download_game_url: not a game')
             return
 
-        session = create_session(self, game)
+        session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
         await interaction.response.send_message('Downloaded "%s" and began a new session. (**/start** to start the game.)' % (game.filename,))
 
@@ -289,7 +289,7 @@ class DiscogClient(discord.Client):
         if not game:
             await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
             return
-        session = create_session(self, game)
+        session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
@@ -348,7 +348,7 @@ class DiscogClient(discord.Client):
                 for out in outls:
                     await chan.send('|\n'+out)
             return
-        session = create_session(self, game)
+        session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
