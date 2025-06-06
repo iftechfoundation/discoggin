@@ -91,7 +91,7 @@ def delete_session(app, sessid):
     delete_flat_dir(savefiledir)
 
     curs = app.db.cursor()
-    curs.execute('UPDATE channels SET sessid = ? WHERE sessid = ?', (sessid, sessid,))
+    curs.execute('UPDATE channels SET sessid = ? WHERE sessid = ?', (None, sessid,))
     curs.execute('DELETE FROM sessions WHERE sessid = ?', (sessid,))
 
 def get_playchannels(app):
