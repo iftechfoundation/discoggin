@@ -18,6 +18,7 @@ def content_to_markup(dat):
     """Convert a ContentLine object into a Discord message, using
     Discord markup as much as possible.
     """
+    ### has some bugs to do with whitespace. E.g. "_This _not_ that._"
     res = []
     for tup in dat.arr:
         text = tup[0]
