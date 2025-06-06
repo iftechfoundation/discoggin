@@ -7,7 +7,7 @@ def delete_flat_dir(path):
         raise Exception('not a directory: %s' % (path,))
     files = list(os.scandir(path))
     for ent in files:
-        if ent.is_dir():
+        if ent.is_dir(follow_symlinks=False):
             raise Exception('contains a directory: %s' % (ent.path,))
     for ent in files:
         os.remove(ent.path)
