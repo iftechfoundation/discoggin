@@ -24,12 +24,15 @@ def content_to_markup(dat):
         style = tup[1] if len(tup) > 1 else 'normal'
         val = escape(text)
         if style == 'header' or style == 'subheader' or style == 'input':
-            val = '**'+val+'**'
+            sval = '**'+val+'**'
         elif style == 'emphasized':
-            val = '_'+val+'_'
+            sval = '_'+val+'_'
         elif style == 'preformatted':
-            val = '`'+val+'`'
-        res.append(val)
+            # use the unescaped text here
+            sval = '`'+text+'`'
+        else:
+            sval = val
+        res.append(sval)
     return ''.join(res)
 
 pat_singlechar = re.compile('[`*_<>\\[\\]\\\\]')
