@@ -80,7 +80,17 @@ def create_session(app, game):
     return Session(*tup)
 
 def delete_session(app, sessid):
-    pass ###
+    session = get_session_by_id(app, sessid)
+    if session is None:
+        return
+    
+    autosavedir = os.path.join(app.autosavedir, session.sessdir)
+    delete_flat_dir(autosavedir)
+    savefiledir = os.path.join(app.savefiledir, session.sessdir)
+    delete_flat_dir(savefiledir)
+
+    curs.execute('UPDATE channels SET sessid = ? WHERE sessid = ?', (sessid, sessid,))
+    curs.execute('DELETE FROM sessions WHERE sessid = ?', (sessid,))
 
 def get_playchannels(app):
     curs = app.db.cursor()
