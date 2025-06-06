@@ -1,12 +1,14 @@
 import re
 
-### what to do about multiline inputs?
 pat_cmd = re.compile('^[\\s]*>(.*)$')
 
 def extract_command(msg):
     """See whether a Discord message is meant as a command input.
+    A command input is one line starting with ">" (perhaps whitespace too).
+    Multi-line inputs, or inputs containing a command plus commentary,
+    do not count.
     """
-    match = pat_cmd.match(msg)
+    match = pat_cmd.match(msg.strip())
     if match is None:
         return None
     val = match.group(1)
