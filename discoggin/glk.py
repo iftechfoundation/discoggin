@@ -7,7 +7,7 @@ def get_glkstate_for_session(app, session):
     GlkState with exit=True. If the game has never run at all (or has
     been force-quit), this returns None.
     """
-    path = os.path.join(app.autosavedir, session.autosave, 'glkstate.json')
+    path = os.path.join(app.autosavedir, session.sessdir, 'glkstate.json')
     if not os.path.exists(path):
         return None
     try:
@@ -23,7 +23,7 @@ def put_glkstate_for_session(app, session, state):
     This assumes the session directory exists. (Unless state is None,
     in which case it's okay if there is nothing to delete!)
     """
-    path = os.path.join(app.autosavedir, session.autosave, 'glkstate.json')
+    path = os.path.join(app.autosavedir, session.sessdir, 'glkstate.json')
     if not state:
         if os.path.exists(path):
             os.remove(path)

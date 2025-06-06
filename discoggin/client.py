@@ -161,7 +161,7 @@ class DiscogClient(discord.Client):
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
             return
-        savefiledir = os.path.join(self.savefiledir, playchan.session.autosave)
+        savefiledir = os.path.join(self.savefiledir, playchan.session.sessdir)
         if not os.path.exists(savefiledir):
             files = []
         else:
@@ -409,11 +409,11 @@ class DiscogClient(discord.Client):
             await message.channel.send('Error: The game file seems to be missing.')
             return
 
-        autosavedir = os.path.join(self.autosavedir, playchan.session.autosave)
+        autosavedir = os.path.join(self.autosavedir, playchan.session.sessdir)
         if not os.path.exists(autosavedir):
             os.mkdir(autosavedir)
             
-        savefiledir = os.path.join(self.savefiledir, playchan.session.autosave)
+        savefiledir = os.path.join(self.savefiledir, playchan.session.sessdir)
         if not os.path.exists(savefiledir):
             os.mkdir(savefiledir)
 

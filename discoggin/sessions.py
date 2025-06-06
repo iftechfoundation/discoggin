@@ -9,7 +9,7 @@ class Session:
         self.movecount = movecount
         self.lastupdate = lastupdate
 
-        self.autosave = 's%d' % (self.sessid,)
+        self.sessdir = 's%d' % (self.sessid,)
 
     def __repr__(self):
         timestr = time.ctime(self.lastupdate)
@@ -78,6 +78,9 @@ def create_session(app, game):
     tup = (sessid, game.hash, 0, int(time.time()))
     curs.execute('INSERT INTO sessions (sessid, hash, movecount, lastupdate) VALUES (?, ?, ?, ?)', tup)
     return Session(*tup)
+
+def delete_session(app, sessid):
+    
 
 def get_playchannels(app):
     curs = app.db.cursor()
