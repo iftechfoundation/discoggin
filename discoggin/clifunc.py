@@ -1,5 +1,7 @@
 import re
 
+from .sessions import get_session_by_id, delete_session
+
 def cmd_createdb(args, app):
     curs = app.db.cursor()
     res = curs.execute('SELECT name FROM sqlite_master')
@@ -43,3 +45,11 @@ def cmd_addchannel(args, app):
     curs.execute('INSERT INTO channels (gckey, gid, chanid, sessid) VALUES (?, ?, ?, ?)', tup)
     print('enabled channel')
     
+def cmd_delsession(args, app):
+    session = get_session_by_id(app, args.sessionid)
+    if session is None:
+        print('no such session:', args.sessionid)
+        return
+
+    delete_session(app, session.sessid)
+    print('deleted session')

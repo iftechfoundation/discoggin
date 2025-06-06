@@ -1,4 +1,5 @@
 import time
+import os, os.path
 
 class Session:
     def __init__(self, sessid, hash, movecount=0, lastupdate=None):
@@ -89,6 +90,7 @@ def delete_session(app, sessid):
     savefiledir = os.path.join(app.savefiledir, session.sessdir)
     delete_flat_dir(savefiledir)
 
+    curs = app.db.cursor()
     curs.execute('UPDATE channels SET sessid = ? WHERE sessid = ?', (sessid, sessid,))
     curs.execute('DELETE FROM sessions WHERE sessid = ?', (sessid,))
 
@@ -182,4 +184,5 @@ def update_session_movecount(app, session, movecount=None):
 
 # Late imports
 from .games import get_game_by_hash
+from .util import delete_flat_dir
 

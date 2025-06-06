@@ -4,7 +4,7 @@ import argparse
 import configparser
 
 from .client import DiscogClient
-from .clifunc import cmd_createdb, cmd_addchannel
+from .clifunc import cmd_createdb, cmd_addchannel, cmd_delsession
 
 popt = argparse.ArgumentParser(prog='python -m discoggin')
 subopt = popt.add_subparsers(dest='cmd', title='commands')
@@ -22,6 +22,10 @@ pcmd.set_defaults(cmdfunc=cmd_createdb)
 pcmd = subopt.add_parser('addchannel', help='add a playing channel')
 pcmd.add_argument('channelurl')
 pcmd.set_defaults(cmdfunc=cmd_addchannel)
+
+pcmd = subopt.add_parser('delsession', help='delete a session')
+pcmd.add_argument('sessionid')
+pcmd.set_defaults(cmdfunc=cmd_delsession)
 
 args = popt.parse_args()
 
