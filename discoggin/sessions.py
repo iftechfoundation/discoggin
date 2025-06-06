@@ -80,7 +80,7 @@ def create_session(app, game):
     return Session(*tup)
 
 def delete_session(app, sessid):
-    
+    pass ###
 
 def get_playchannels(app):
     curs = app.db.cursor()
