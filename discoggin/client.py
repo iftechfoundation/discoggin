@@ -417,7 +417,7 @@ class DiscogClient(discord.Client):
         if not os.path.exists(savefiledir):
             os.mkdir(savefiledir)
 
-        iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, gamefile=gamefile, autosavedir=autosavedir)
+        iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, autosavedir=autosavedir)
         if iargs is None:
             logging.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
             await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
