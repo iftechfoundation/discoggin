@@ -301,8 +301,16 @@ class DiscogClient(discord.Client):
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
             return
-        session = get_session_by_id(self, gamearg)
-        if session:
+        
+        try:
+            gameargint = int(gamearg)
+        except:
+            gameargint = None
+        if gameargint is not None:
+            session = get_session_by_id(self, gameargint)
+            if not session or session.gid != interaction.guild_id:
+                await interaction.response.send_message('No session %d.' % (gameargint,))
+                return
             prevchan = get_playchannel_for_session(self, session.sessid)
             if prevchan:
                 if prevchan.chanid == playchan.chanid:
