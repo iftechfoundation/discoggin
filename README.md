@@ -104,15 +104,21 @@ Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don'
 [Glulxe]: https://github.com/erkyrath/glulxe
 [Bocfel]: https://github.com/erkyrath/bocfel
 
-Activate the bot in your `#game` channel. Use this command, copying in the channel URL from your Discord server:
+Create the bot's SQLite database:
+
+	./venv/bin/python3 -m discoggin createdb
+
+Activate the bot in your `#game` channel. Use this command, replacing the URL with the channel URL from your Discord server:
 
 	./venv/bin/python3 -m discoggin addchannel https://discord.com/channels/12345678/87654321
 
-Run Discoggin with the command to install its slash commands:
+Install the bot's slash commands on your server:
 
 	./venv/bin/python3 -m discoggin --logstream cmdinstall
 
-Now you can run Discoggin. This command will start the bot.
+Hit slash in your Discord window to see a list of the commands. You may have to reload your Discord window to make them appear. The commands won't work yet, though, because the bot isn't running.
+
+Time to do that! This command will start the bot:
 
 	./venv/bin/python3 -m discoggin
 
