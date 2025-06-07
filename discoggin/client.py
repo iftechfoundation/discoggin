@@ -35,9 +35,9 @@ def appcmd(name, description):
 class DiscogClient(discord.Client):
     """Our Discord client class.
     """
-    def __init__(self, config, cmdsync=False):
+    def __init__(self, config):
         self.config = config
-        self.cmdsync = cmdsync
+        self.cmdsync = False
 
         self.dbfile = config['DEFAULT']['DBFile']
         
@@ -74,6 +74,7 @@ class DiscogClient(discord.Client):
     async def setup_hook(self):
         """Called when the client is starting up. We have not yet connected
         to Discord, but we have entered the async regime.
+        ### TODO: Make this a CLI command really.
         """
         # Create the HTTP session, which must happen inside the async
         # event loop.
@@ -87,6 +88,9 @@ class DiscogClient(discord.Client):
             # RPC calls rather than the websocket.)
             logging.info('Syncing %d slash commands...', len(_appcmds))
             await self.tree.sync()
+            # The cmdsync option was set by a command-line command.
+            # Shut down now that it's done.
+            await self.close()
 
     async def close(self):
         """Called when the client is shutting down. We override this to

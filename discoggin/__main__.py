@@ -4,20 +4,20 @@ import argparse
 import configparser
 
 from .client import DiscogClient
-from .clifunc import cmd_createdb, cmd_addchannel, cmd_delsession
+from .clifunc import cmd_createdb, cmd_addchannel, cmd_delsession, cmd_cmdinstall
 
 popt = argparse.ArgumentParser(prog='python -m discoggin')
 subopt = popt.add_subparsers(dest='cmd', title='commands')
 
-popt.add_argument('--cmdsync',
-                  action='store_true', dest='cmdsync',
-                  help='upload slash commands to Discord')
 popt.add_argument('--logstream',
                   action='store_true', dest='logstream',
                   help='log to stdout rather than the configured file')
 
 pcmd = subopt.add_parser('createdb', help='create database tables')
 pcmd.set_defaults(cmdfunc=cmd_createdb)
+
+pcmd = subopt.add_parser('cmdinstall', help='upload slash commands to Discord')
+pcmd.set_defaults(cmdfunc=cmd_cmdinstall)
 
 pcmd = subopt.add_parser('addchannel', help='add a playing channel')
 pcmd.add_argument('channelurl')
@@ -46,7 +46,7 @@ rootlogger = logging.getLogger()
 rootlogger.addHandler(loghandler)
 rootlogger.setLevel(logging.INFO)
         
-client = DiscogClient(config, cmdsync=args.cmdsync)
+client = DiscogClient(config)
 
 if args.cmd:
     args.cmdfunc(args, client)

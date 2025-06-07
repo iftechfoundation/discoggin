@@ -1,4 +1,6 @@
+import sys
 import re
+import logging
 
 from .sessions import get_session_by_id, delete_session
 
@@ -24,6 +26,12 @@ def cmd_createdb(args, app):
     else:
         print('creating "channels" table...')
         curs.execute('CREATE TABLE channels(gckey unique, gid, chanid, sessid)')
+
+def cmd_cmdinstall(args, app):
+    app.cmdsync = True
+    bottoken = app.config['DEFAULT']['BotToken']
+    app.run(bottoken)
+    print('slash commands installed')
 
 def cmd_addchannel(args, app):
     pat = re.compile('^https://discord.com/channels/([0-9]+)/([0-9]+)$')

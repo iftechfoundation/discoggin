@@ -108,7 +108,11 @@ Activate the bot in your `#game` channel. Use this command, copying in the chann
 
 	./venv/bin/python3 -m discoggin addchannel https://discord.com/channels/12345678/87654321
 
-Now you can run Discoggin:
+Run Discoggin with the command to install its slash commands:
+
+	./venv/bin/python3 -m discoggin --logstream cmdinstall
+
+Now you can run Discoggin. This command will start the bot.
 
 	./venv/bin/python3 -m discoggin
 
