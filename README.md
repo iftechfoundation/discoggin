@@ -26,6 +26,8 @@ At present, Discoggin can only play Z-code games (file suffix `.z1` through `.z8
 
 The status line is broken on Z-code games. (Gets stuck on the first turn or blank.)
 
+File prompts (for SAVE/RESTORE/etc) are broken on Z-code games.
+
 There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
 
 ## Slash commands
@@ -68,13 +70,15 @@ Go to the [Discord developer portal][discorddev] and hit "New Application".
 
 [discorddev]: https://discord.com/developers/applications
 
-On the Installation tab, under "Guild Install", add "application.commands" and "bots" to the Scopes line. Add "Manage Channels", "Manage Messages", "Send Messages", "Use Slash Commands" to the Permissions line.
+On the General Information tab, give your bot an appropriate name. For this example, we will call it "MyDiscoggin".
 
-On the Bot tab, turn on the "Message Content Intent" switch. Create a Bot Token and record its value.
+On the Installation tab, turn *off* the "User Install" checkbox. Then, under "Guild Install", add "bot" to the Scopes line. A new line will appear for Permissions; add "Manage Channels", "Manage Messages", "Send Messages", "Use Slash Commands".
+
+On the Bot tab, turn *on* the "Message Content Intent" switch. Hit the "Reset Token" button to create a bot token; record its value.
 
 Back on the Installation tab, use the URL under "Install Link" to install the application on your Discord instance. Give it the permissions it asks for.
 
-The Discoggin-IF bot will appear on your server, but it will appear as offline. That's because the bot process isn't running yet.
+The MyDiscoggin bot will appear on your server, but it will appear as offline. That's because the bot process isn't running yet.
 
 Create a channel for Discoggin to play games in. For the sake of example, we will call it `#game`.
 
@@ -86,7 +90,7 @@ Set up a directory to hold the bot's files. Create subdirectories:
 
 Copy the [`sample.config`](./sample.config) file into your directory and rename it `app.config`.
 
-In `app.config`, change the `BotToken` entry to the token value you recorded above. (If you didn't write down the value, you'll have to reset it -- Discord only shows you the token once.)
+In `app.config`, change the `BotToken` entry to the token value you recorded above. (If you didn't write down the value, you'll have to reset it again -- Discord only shows you the token once.)
 
 Create a venv for the application. (The [discord.py][] library doesn't play well with some other modules, so I prefer to use a venv.)
 
