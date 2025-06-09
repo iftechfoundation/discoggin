@@ -134,7 +134,7 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Game is starting...')
         
         if playchan.sessid in self.inflight:
-            self.logger.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            playchan.logger().warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
             return
         self.inflight.add(playchan.sessid)
         try:
@@ -395,7 +395,7 @@ class DiscogClient(discord.Client):
             return
 
         if playchan.sessid in self.inflight:
-            self.logger.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            playchan.logger().warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
             return
         self.inflight.add(playchan.sessid)
         try:

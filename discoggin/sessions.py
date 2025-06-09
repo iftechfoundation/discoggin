@@ -37,6 +37,12 @@ class PlayChannel:
         if self.sessid:
             val = ' session %s' % (self.sessid,)
         return '<PlayChannel %s%s>' % (self.gckey, val,)
+
+    def logger(self):
+        if self.sessid:
+            return logging.getLogger('cli.s%d' % (self.sessid,))
+        else:
+            return logging.getLogger('cli.s-')
     
 def get_sessions(app):
     curs = app.db.cursor()
