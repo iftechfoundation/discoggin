@@ -39,7 +39,7 @@ if args.logstream:
     loghandler = logging.StreamHandler(sys.stdout)
 else:
     loghandler = logging.handlers.WatchedFileHandler(logfilepath)
-logformatter = logging.Formatter('[%(levelname).1s %(asctime)s] %(message)s', datefmt='%b-%d %H:%M:%S')
+logformatter = logging.Formatter('[%(levelname).1s %(asctime)s] (%(name)s) %(message)s', datefmt='%b-%d %H:%M:%S')
 loghandler.setFormatter(logformatter)
 
 rootlogger = logging.getLogger()

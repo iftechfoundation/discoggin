@@ -39,6 +39,8 @@ class DiscogClient(discord.Client):
         self.config = config
         self.cmdsync = False
 
+        self.logger = logging.getLogger('cli')
+
         self.dbfile = config['DEFAULT']['DBFile']
         
         # These are absolutized because we will pass them to the interpreter,
@@ -86,7 +88,7 @@ class DiscogClient(discord.Client):
             # this once after adding or modifying a slash command.
             # (No, we're not connected to Discord yet. This uses web
             # RPC calls rather than the websocket.)
-            logging.info('Syncing %d slash commands...', len(_appcmds))
+            self.logger.info('Syncing %d slash commands...', len(_appcmds))
             await self.tree.sync()
             # The cmdsync option was set by a command-line command.
             # Shut down now that it's done.
@@ -96,7 +98,7 @@ class DiscogClient(discord.Client):
         """Called when the client is shutting down. We override this to
         finalize resources.
         """
-        logging.warning('Shutting down...')
+        self.logger.warning('Shutting down...')
         
         if self.httpsession:
             await self.httpsession.close()
@@ -112,7 +114,7 @@ class DiscogClient(discord.Client):
         """We have finished connecting to Discord.
         (Docs recommend against doing Discord API calls from here.)
         """
-        logging.info('Logged in as %s', self.user)
+        self.logger.info('Logged in as %s', self.user)
 
     # Slash command implementations.
         
@@ -132,7 +134,7 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Game is starting...')
         
         if playchan.sessid in self.inflight:
-            logging.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            self.logger.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
             return
         self.inflight.add(playchan.sessid)
         try:
@@ -211,7 +213,7 @@ class DiscogClient(discord.Client):
         try:
             res = await download_game_url(self, url)
         except Exception as ex:
-            logging.error('Download: %s', ex, exc_info=ex)
+            self.logger.error('Download: %s', ex, exc_info=ex)
             await interaction.response.send_message('Download error: %s' % (ex,))
         if isinstance(res, str):
             await interaction.response.send_message(res)
@@ -393,7 +395,7 @@ class DiscogClient(discord.Client):
             return
 
         if playchan.sessid in self.inflight:
-            logging.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
+            self.logger.warning('run_turn wrapper (s%s): command in flight', playchan.sessid)
             return
         self.inflight.add(playchan.sessid)
         try:
@@ -410,14 +412,14 @@ class DiscogClient(discord.Client):
         two turns on the same session at the same time.
         """
         if not chan:
-            logging.warning('run_turn: channel not set')
+            self.logger.warning('run_turn: channel not set')
             return
 
         firsttime = (glkstate is None or not glkstate.islive())
 
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
-            logging.error('run_turn (s%s): game file not found: %s', playchan.sessid, gamefile)
+            self.logger.error('run_turn (s%s): game file not found: %s', playchan.sessid, gamefile)
             await message.channel.send('Error: The game file seems to be missing.')
             return
 
@@ -431,7 +433,7 @@ class DiscogClient(discord.Client):
 
         iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, autosavedir=autosavedir)
         if iargs is None:
-            logging.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
+            self.logger.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
             await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
             return
 
@@ -446,7 +448,7 @@ class DiscogClient(discord.Client):
         if firsttime:
             # Game-start case.
             if cmd is not None:
-                logging.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
+                self.logger.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
                 return
 
             # Fresh state.
@@ -461,7 +463,7 @@ class DiscogClient(discord.Client):
         else:
             # Regular turn case.
             if cmd is None:
-                logging.warning('run_turn (s%s): tried to send no command when game was running', playchan.sessid)
+                self.logger.warning('run_turn (s%s): tried to send no command when game was running', playchan.sessid)
                 return
                 
             try:
@@ -486,11 +488,11 @@ class DiscogClient(discord.Client):
                 return await proc.communicate((indat+'\n').encode())
             (outdat, errdat) = await asyncio.wait_for(func(), 5)
         except TimeoutError:
-            logging.error('Interpreter error (s%s): Command timed out', playchan.sessid)
+            self.logger.error('Interpreter error (s%s): Command timed out', playchan.sessid)
             await chan.send('Interpreter error: Command timed out.')
             return
         except Exception as ex:
-            logging.error('Interpreter exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
+            self.logger.error('Interpreter exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
             await chan.send('Interpreter exception: %s' % (ex,))
             return
             
@@ -505,17 +507,17 @@ class DiscogClient(discord.Client):
                 outstr = outdat.decode()
             except:
                 outstr = str(outdat)
-            logging.error('Invalid JSON output (s%s): %r', playchan.sessid, outstr)
+            self.logger.error('Invalid JSON output (s%s): %r', playchan.sessid, outstr)
             await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
         except Exception as ex:
-            logging.error('JSON decode exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
+            self.logger.error('JSON decode exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
             await chan.send('JSON decode exception: %s' % (ex,))
 
         # Display errorls, which contains the contents of JSON-encoded
         # error stanza(s). But don't exit just because got errors.
         for msg in errorls:
-            logging.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
+            self.logger.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
         outls = [ 'Interpreter error: %s' % (msg,) for msg in errorls ]
         outls = rebalance_output(outls)
         for out in outls:
@@ -525,7 +527,7 @@ class DiscogClient(discord.Client):
             # If we didn't get any *non*-errors, that's a reason to exit.
             # But make sure we report at least one error.
             if not errorls:
-                logging.error('Interpreter error (s%s): no update', playchan.sessid)
+                self.logger.error('Interpreter error (s%s): no update', playchan.sessid)
                 await chan.send('Interpreter error: no update')
             return
 

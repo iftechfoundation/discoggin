@@ -70,7 +70,7 @@ async def download_game_url(app, url):
     """
     global download_nonce
     
-    logging.info('Requested download: %s', url)
+    app.logger.info('Requested download: %s', url)
 
     if not (url.lower().startswith('http://') or url.lower().startswith('https://')):
         return 'Download URL must start with `http://` or `https://`'
@@ -114,7 +114,7 @@ async def download_game_url(app, url):
 
     ### this would be a great place to pull ifiction from blorbs
     ### and unpack resources, too
-    logging.info('Downloaded %s (hash %s, format %s)', url, hash, format)
+    app.logger.info('Downloaded %s (hash %s, format %s)', url, hash, format)
 
     finaldir = os.path.join(app.gamesdir, hash)
     finalpath = os.path.join(app.gamesdir, hash, filename)
