@@ -226,6 +226,7 @@ class DiscogClient(discord.Client):
 
         session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
+        session.logger().info('installed "%s" in #%s', game.filename, playchan.channame)
         await interaction.response.send_message('Downloaded "%s" and began a new session. (**/start** to start the game.)' % (game.filename,))
 
     @appcmd('games', description='List downloaded games')
@@ -297,6 +298,7 @@ class DiscogClient(discord.Client):
             return
         session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
+        session.logger().info('new session for "%s" in #%s', game.filename, playchan.channame)
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
         
@@ -327,8 +329,10 @@ class DiscogClient(discord.Client):
             set_channel_session(self, playchan, session)
             game = get_game_by_hash(self, session.hash)
             if not game:
+                playchan.logger().warning('activated session, but could not find game')
                 await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
                 return
+            session.logger().info('selected "%s" in #%s', game.filename, playchan.channame)
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
             # Display the status line of this session
             glkstate = get_glkstate_for_session(self, session)
@@ -352,6 +356,7 @@ class DiscogClient(discord.Client):
         session = get_available_session_for_hash(self, game.hash, interaction.guild_id)
         if session:
             set_channel_session(self, playchan, session)
+            session.logger().info('selected "%s" in #%s', game.filename, playchan.channame)
             await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
             # Display the status line of this session
             glkstate = get_glkstate_for_session(self, session)
@@ -364,6 +369,7 @@ class DiscogClient(discord.Client):
             return
         session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
+        session.logger().info('new session for "%s" in #%s', game.filename, playchan.channame)
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
         

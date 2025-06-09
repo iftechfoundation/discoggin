@@ -28,6 +28,9 @@ class PlayChannel:
         self.chanid = chanid
         self.sessid = sessid
 
+        # Replaced more sensibly by get_valid_playchannel()
+        self.channame = str(self.chanid)
+
         # Filled in by accessors that offer the withgame option
         self.game = None
         self.session = None
@@ -149,7 +152,8 @@ def get_playchannel_for_session(app, sessid):
     return PlayChannel(*tup)
 
 def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
-    ### We call this on every message event, so it would be really good to cache the channel list.
+    ### We call this on every message event, so it would be really good to cache the channel list. With their names!
+    channame = None
     if interaction:
         gid = interaction.guild_id
         if not gid:
@@ -159,6 +163,7 @@ def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
         chanid = interaction.channel.id
         if not chanid:
             return None
+        channame = interaction.channel.name
     elif message:
         if not message.guild:
             return None
@@ -170,6 +175,7 @@ def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
         chanid = message.channel.id
         if not chanid:
             return None
+        channame = message.channel.name
     else:
         return None
     
@@ -180,6 +186,9 @@ def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
     if not tup:
         return None
     playchan = PlayChannel(*tup)
+
+    if channame:
+        playchan.channame = channame
 
     if withgame:
         if playchan.sessid:
