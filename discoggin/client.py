@@ -421,7 +421,7 @@ class DiscogClient(discord.Client):
 
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
-            logger.error('run_turn (s%s): game file not found: %s', playchan.sessid, gamefile)
+            logger.error('run_turn: game file not found: %s', gamefile)
             await message.channel.send('Error: The game file seems to be missing.')
             return
 
@@ -435,7 +435,7 @@ class DiscogClient(discord.Client):
 
         iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, autosavedir=autosavedir)
         if iargs is None:
-            logger.warning('run_turn (s%s): unknown format: %s', playchan.sessid, playchan.game.format)
+            logger.warning('run_turn: unknown format: %s', playchan.game.format)
             await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
             return
 
@@ -450,7 +450,7 @@ class DiscogClient(discord.Client):
         if firsttime:
             # Game-start case.
             if cmd is not None:
-                logger.warning('run_turn (s%s): tried to send command when game was not running: %s', playchan.sessid, cmd)
+                logger.warning('run_turn: tried to send command when game was not running: %s', cmd)
                 return
 
             # Fresh state.
@@ -465,11 +465,12 @@ class DiscogClient(discord.Client):
         else:
             # Regular turn case.
             if cmd is None:
-                logger.warning('run_turn (s%s): tried to send no command when game was running', playchan.sessid)
+                logger.warning('run_turn: tried to send no command when game was running')
                 return
                 
             try:
                 input = glkstate.construct_input(cmd)
+                xxx()
                 indat = json.dumps(input)
             except Exception as ex:
                 await chan.send('Unable to construct input: %s' % (ex,))
@@ -490,11 +491,11 @@ class DiscogClient(discord.Client):
                 return await proc.communicate((indat+'\n').encode())
             (outdat, errdat) = await asyncio.wait_for(func(), 5)
         except TimeoutError:
-            logger.error('Interpreter error (s%s): Command timed out', playchan.sessid)
+            logger.error('Interpreter error: Command timed out')
             await chan.send('Interpreter error: Command timed out.')
             return
         except Exception as ex:
-            logger.error('Interpreter exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
+            logger.error('Interpreter exception: %s', ex, exc_info=ex)
             await chan.send('Interpreter exception: %s' % (ex,))
             return
             
@@ -509,17 +510,17 @@ class DiscogClient(discord.Client):
                 outstr = outdat.decode()
             except:
                 outstr = str(outdat)
-            logger.error('Invalid JSON output (s%s): %r', playchan.sessid, outstr)
+            logger.error('Invalid JSON output: %r', outstr)
             await chan.send('Invalid JSON output: %s' % (outstr[:160],))
             return
         except Exception as ex:
-            logger.error('JSON decode exception (s%s): %s', playchan.sessid, ex, exc_info=ex)
+            logger.error('JSON decode exception: %s', ex, exc_info=ex)
             await chan.send('JSON decode exception: %s' % (ex,))
 
         # Display errorls, which contains the contents of JSON-encoded
         # error stanza(s). But don't exit just because got errors.
         for msg in errorls:
-            logger.error('Interpreter error message (s%s): %s', playchan.sessid, msg)
+            logger.error('Interpreter error message: %s', msg)
         outls = [ 'Interpreter error: %s' % (msg,) for msg in errorls ]
         outls = rebalance_output(outls)
         for out in outls:
@@ -529,7 +530,7 @@ class DiscogClient(discord.Client):
             # If we didn't get any *non*-errors, that's a reason to exit.
             # But make sure we report at least one error.
             if not errorls:
-                logger.error('Interpreter error (s%s): no update', playchan.sessid)
+                logger.error('Interpreter error: no update')
                 await chan.send('Interpreter error: no update')
             return
 
