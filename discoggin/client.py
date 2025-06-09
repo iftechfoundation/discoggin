@@ -158,6 +158,7 @@ class DiscogClient(discord.Client):
         # We delete the GlkState entirely, rather than messing with the
         # exit flag. This lets us recover from a corrupted GlkState or
         # autosave entry.
+        playchan.logger().info('game force-quit')
         put_glkstate_for_session(self, playchan.session, None)
         await interaction.response.send_message('Game has been stopped. (**/start** to restart it.)')
 
@@ -459,6 +460,8 @@ class DiscogClient(discord.Client):
                 logger.warning('run_turn: tried to send command when game was not running: %s', cmd)
                 return
 
+            playchan.logger().info('game started')
+            
             # Fresh state.
             glkstate = GlkState()
 
@@ -474,6 +477,8 @@ class DiscogClient(discord.Client):
                 logger.warning('run_turn: tried to send no command when game was running')
                 return
                 
+            playchan.logger().info('>%s', cmd)
+            
             try:
                 input = glkstate.construct_input(cmd)
                 indat = json.dumps(input)
