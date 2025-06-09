@@ -470,9 +470,9 @@ class DiscogClient(discord.Client):
                 
             try:
                 input = glkstate.construct_input(cmd)
-                xxx()
                 indat = json.dumps(input)
             except Exception as ex:
+                logger.error('Unable to construct input: %s', ex, exc_info=ex)
                 await chan.send('Unable to construct input: %s' % (ex,))
                 return
 
