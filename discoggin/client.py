@@ -539,6 +539,7 @@ class DiscogClient(discord.Client):
         try:
             glkstate.accept_update(update, extrainput)
         except Exception as ex:
+            logger.error('Update error: %s', ex, exc_info=ex)
             await chan.send('Update error: %s' % (ex,))
             return
 
