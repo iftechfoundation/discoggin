@@ -24,8 +24,6 @@ At present, Discoggin can only play Z-code games (file suffix `.z1` through `.z8
 
 `UNDO` is currently not working.
 
-The status line is broken on Z-code games. (Gets stuck on the first turn or blank.)
-
 File prompts (for SAVE/RESTORE/etc) are broken on Z-code games.
 
 There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
