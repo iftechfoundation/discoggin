@@ -15,7 +15,7 @@ def get_glkstate_for_session(app, session):
             obj = json.load(fl)
         return GlkState.from_jsonable(obj)
     except Exception as ex:
-        logging.error('get_glkstate: %s', ex, exc_info=ex)
+        session.logger().error('get_glkstate: %s', ex, exc_info=ex)
         return None
 
 def put_glkstate_for_session(app, session, state):

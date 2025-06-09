@@ -1,5 +1,6 @@
 import time
 import os, os.path
+import logging
 
 class Session:
     def __init__(self, sessid, gid, hash, movecount=0, lastupdate=None):
@@ -16,6 +17,9 @@ class Session:
     def __repr__(self):
         timestr = time.ctime(self.lastupdate)
         return '<Session %s (%s): %d moves, %s>' % (self.sessid, self.hash, self.movecount, timestr,)
+
+    def logger(self):
+        return logging.getLogger('cli.s%d' % (self.sessid,))
 
 class PlayChannel:
     def __init__(self, gckey, gid, chanid, sessid=None):
