@@ -516,6 +516,7 @@ class DiscogClient(discord.Client):
         except Exception as ex:
             logger.error('JSON decode exception: %s', ex, exc_info=ex)
             await chan.send('JSON decode exception: %s' % (ex,))
+            return
 
         # Display errorls, which contains the contents of JSON-encoded
         # error stanza(s). But don't exit just because got errors.
