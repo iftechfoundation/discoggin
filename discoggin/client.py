@@ -422,7 +422,7 @@ class DiscogClient(discord.Client):
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
         if not os.path.exists(gamefile):
             logger.error('run_turn: game file not found: %s', gamefile)
-            await message.channel.send('Error: The game file seems to be missing.')
+            await chan.send('Error: The game file seems to be missing.')
             return
 
         autosavedir = os.path.join(self.autosavedir, playchan.session.sessdir)
@@ -436,7 +436,7 @@ class DiscogClient(discord.Client):
         iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, autosavedir=autosavedir)
         if iargs is None:
             logger.warning('run_turn: unknown format: %s', playchan.game.format)
-            await message.channel.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
+            await chan.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
             return
 
         # Inherit env vars
