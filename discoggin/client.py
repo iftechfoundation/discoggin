@@ -440,7 +440,7 @@ class DiscogClient(discord.Client):
         if not os.path.exists(savefiledir):
             os.mkdir(savefiledir)
 
-        iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, autosavedir=autosavedir)
+        iargs, ienv = format_interpreter_args(playchan.game.format, firsttime, terpsdir=self.terpsdir, gamefile=gamefile, savefiledir=savefiledir, autosavedir=autosavedir)
         if iargs is None:
             logger.warning('run_turn: unknown format: %s', playchan.game.format)
             await chan.send('Error: No known interpreter for this format (%s)' % (playchan.game.format,))
@@ -497,7 +497,6 @@ class DiscogClient(discord.Client):
                 proc = await asyncio.create_subprocess_exec(
                     *iargs,
                     env=allenv,
-                    cwd=savefiledir,
                     stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
                 return await proc.communicate((indat+'\n').encode())
             (outdat, errdat) = await asyncio.wait_for(func(), 5)

@@ -218,10 +218,9 @@ class GlkState:
                 'window':self.charinputwin, 'value':cmd
             }
         if self.specialinput == 'fileref_prompt':
-            path = sanitize_filename(cmd)
             return {
                 'type':'specialresponse', 'gen':self.generation,
-                'response':'fileref_prompt', 'value':path
+                'response':'fileref_prompt', 'value':cmd
             }
         raise Exception('game is not expecting input')
 
