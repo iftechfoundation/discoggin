@@ -43,7 +43,6 @@ def escape(val):
     """
     val = pat_singlechar.sub(lambda match:'\\'+match.group(0), val)
     ### more?
-    ### don't escape inside `` spans? Can't escape ` in there, looks like
     return val
 
 # Maximum size of a Discord message (minus a safety margin).
