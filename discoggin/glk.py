@@ -327,15 +327,6 @@ def parse_json(val):
     errls.append('parse_json: more than one non-error result; discarding extras')
     return (objls[0], errls)
 
-def sanitize_filename(val):
-    """Make sure a filename isn't going to bounce into a different
-    directory.
-    """
-    val = val.replace('/', '_')
-    if val.startswith('.'):
-        val = '_'+val
-    return val
-
 def create_metrics(width=None, height=None):
     if not width:
         width = 800
