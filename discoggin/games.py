@@ -146,9 +146,9 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
     if format == 'glulx':
         terp = os.path.join(terpsdir, 'glulxe')
         if firstrun:
-            args = [ terp, '-singleturn', '-filedir', savefiledir, '--autosave', '--autodir', autosavedir, gamefile ]
+            args = [ terp, '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '--autosave', '--autodir', autosavedir, gamefile ]
         else:
-            args = [ terp, '-singleturn', '-filedir', savefiledir, '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
+            args = [ terp, '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '-autometrics', '--autosave', '--autorestore', '--autodir', autosavedir, gamefile ]
         return (args, {})
 
     if format == 'zcode':
@@ -163,9 +163,9 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
         # -m is BOCFEL_DISABLE_META_COMMANDS
         if firstrun:
             env['BOCFEL_SKIP_AUTORESTORE'] = '1'
-            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, gamefile ]
+            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, '-onlyfiledir', gamefile ]
         else:
-            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, '-autometrics', gamefile ]
+            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '-autometrics', gamefile ]
         return (args, env)
         
     return (None, None)
