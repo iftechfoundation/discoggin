@@ -153,6 +153,7 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
 
     if format == 'zcode':
         terp = os.path.join(terpsdir, 'bocfel')
+        transcriptpath = os.path.join(savefiledir, 'transcript.txt')
         env = {
             'BOCFEL_AUTOSAVE': '1',
             'BOCFEL_AUTOSAVE_DIRECTORY': autosavedir,
@@ -161,11 +162,12 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
         # -C is BOCFEL_DISABLE_CONFIG
         # -H is BOCFEL_DISABLE_HISTORY_PLAYBACK
         # -m is BOCFEL_DISABLE_META_COMMANDS
+        # -T is BOCFEL_TRANSCRIPT_NAME
         if firstrun:
             env['BOCFEL_SKIP_AUTORESTORE'] = '1'
-            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, '-onlyfiledir', gamefile ]
+            args = [ terp, '-C', '-H', '-m', '-T', transcriptpath, '-singleturn', '-filedir', savefiledir, '-onlyfiledir', gamefile ]
         else:
-            args = [ terp, '-C', '-H', '-m', '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '-autometrics', gamefile ]
+            args = [ terp, '-C', '-H', '-m', '-T', transcriptpath, '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '-autometrics', gamefile ]
         return (args, env)
         
     return (None, None)
