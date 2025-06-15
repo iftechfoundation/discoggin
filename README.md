@@ -22,7 +22,7 @@ There are many. Discoggin is a work in progress.
 
 At present, Discoggin can only play Z-code games (file suffix `.z1` through `.z8` plus `.zblorb`) and Glulx games (file suffix `.ulx` and `.gblorb`). It does not support extended display features like graphics, sound, or hyperlinks. (So `.z6` is not actually going to work.)
 
-`UNDO` does not work in Z-code games. Neither does `SCRIPT ON`. (The transcript turns on but turns off again immediately.)
+`UNDO` does not work in Z-code games.
 
 There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
 
