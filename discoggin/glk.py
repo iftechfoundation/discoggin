@@ -229,7 +229,33 @@ def strkeydict(map):
     
 def intkeydict(map):
     return dict([ (int(key), val) for (key, val) in map.items() ])
-    
+
+def storywindat_from_stanza(stanza):
+    """Look at a stanza (as from stanza_reader()), extract the story
+    window output, and return it as a list of ContentLines.
+
+    This is similar to what accept_update() does, but it's simpler
+    and standalone. (That is, it doesn't operate as part of a GlkState.)
+    It is used for displaying transcripts.
+    """
+    storywindat = []
+    output = stanza.get('output')
+    if not output:
+        return []
+    contents = output.get('content')
+    if not contents:
+        return []
+    for content in contents:
+        text = content.get('text')
+        if text:
+            for line in text:
+                dat = extract_raw(line)
+                if line.get('append') and len(storywindat):
+                    storywindat[-1].extend(dat)
+                else:
+                    storywindat.append(dat)
+    return storywindat
+
 class ContentLine:
     def __init__(self, text=None, style='normal'):
         self.arr = []
@@ -272,6 +298,41 @@ def extract_raw(line):
             res.add(val.get('text', ''), val.get('style', 'normal'))
             ### hyperlink
     return res
+
+def stanza_reader(path):
+    """ Read a file as a sequence of newline-separated JSON stanzas.
+
+    A partial stanza at the end will be silently ignored.
+
+    It's okay if the JSON has more whitespace or newlines. You just need
+    at least one newline between stanzas.
+
+    If non-JSON occurs at the start or between stanzas, this will throw
+    an exception. Bad formatting inside a stanza will silently end the
+    parsing (after reading in the entire rest of the file). No, that's not
+    ideal.
+    """
+    with open(path, 'r') as fl:
+        buf = ''
+        while True:
+            ln = fl.readline()
+            if not ln:
+                # End of file.
+                # We may have an incomplete stanza in the buffer, but we
+                # ignore that.
+                break
+            if not buf:
+                buf = ln.lstrip()
+                if buf and not buf.startswith('{'):
+                    raise Exception('non-JSON encountered')
+            else:
+                buf = buf + ln
+            try:
+                obj = json.loads(buf)
+            except:
+                continue
+            yield obj
+            buf = ''
 
 def parse_json(val):
     """Normally an interpreter returns a single JSON update stanza.
