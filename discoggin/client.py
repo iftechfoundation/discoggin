@@ -78,7 +78,7 @@ class DiscogClient(discord.Client):
         """Print a bunch of lines (paragraphs) to the Discord channel.
         They should already be formatted in Discord markup.
         Add prefix if provided.
-        ### this must be shorter than the safety margin
+        ### the prefix must be shorter than the safety margin
         """
         # Optimize to fit in the fewest number of Discord messages.
         outls = rebalance_output(outls)
@@ -222,6 +222,21 @@ class DiscogClient(discord.Client):
         outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
         await self.print_lines(outls, chan, '|\n')
 
+    @appcmd('recap', description='Recap the last few commands')
+    async def on_cmd_recap(self, interaction, count:int=3):
+        playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
+        if not playchan:
+            await interaction.response.send_message('Discoggin does not play games in this channel.')
+            return
+        if not playchan.game:
+            await interaction.response.send_message('No game is being played in this channel.')
+            return
+        
+        # At least one, but no more than ten, please
+        count = min(10, count)
+        count = max(1, count)
+        await interaction.response.send_message('Recapping last %d commands.' % (count,))
+        
     @appcmd('install', description='Download and install a game file for play')
     async def on_cmd_install(self, interaction, url:str):
         playchan = get_valid_playchannel(self, interaction=interaction)
