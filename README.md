@@ -39,6 +39,7 @@ Discoggin is controlled with the usual sort of Discord slash commands.
 - **/newsession** _GAME_ : Explicitly start a new session for the named game.
 - **/start** : Begin the selected game in this channel.
 - **/status** : Display the current status line of a game.
+- **/recap** _COUNT_ : Recap the last few commands (max of 10).
 - **/files** : List save files (and other data files) recorded in this session.
 - **/forcequit** : Shut down a game if it's gotten stuck for some reason. (You will then need to **/start** it again.)
 
