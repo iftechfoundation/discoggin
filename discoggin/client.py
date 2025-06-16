@@ -220,9 +220,7 @@ class DiscogClient(discord.Client):
         chan = interaction.channel
         await interaction.response.send_message('Status line displayed.', ephemeral=True)
         outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
-        outls = rebalance_output(outls)
-        for out in outls:
-            await chan.send('|\n'+out)
+        await self.print_lines(outls, chan, '|\n')
 
     @appcmd('install', description='Download and install a game file for play')
     async def on_cmd_install(self, interaction, url:str):
@@ -360,9 +358,7 @@ class DiscogClient(discord.Client):
             if glkstate:
                 chan = interaction.channel
                 outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
-                outls = rebalance_output(outls)
-                for out in outls:
-                    await chan.send('|\n'+out)
+                await self.print_lines(outls, chan, '|\n')
             return
             
         game = get_game_by_name(self, gamearg)
@@ -384,9 +380,7 @@ class DiscogClient(discord.Client):
             if glkstate:
                 chan = interaction.channel
                 outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
-                outls = rebalance_output(outls)
-                for out in outls:
-                    await chan.send('|\n'+out)
+                await self.print_lines(outls, chan, '|\n')
             return
         session = create_session(self, game, interaction.guild_id)
         set_channel_session(self, playchan, session)
@@ -550,13 +544,11 @@ class DiscogClient(discord.Client):
             return
 
         # Display errorls, which contains the contents of JSON-encoded
-        # error stanza(s). But don't exit just because got errors.
+        # error stanza(s). But don't exit just because we got errors.
         for msg in errorls:
             logger.error('Interpreter error message: %s', msg)
         outls = [ 'Interpreter error: %s' % (msg,) for msg in errorls ]
-        outls = rebalance_output(outls)
-        for out in outls:
-            await chan.send(out)
+        await self.print_lines(outls, chan)
 
         if update is None:
             # If we didn't get any *non*-errors, that's a reason to exit.
