@@ -1,4 +1,5 @@
 import os, os.path
+import time
 import json
 import logging
 import sqlite3
@@ -424,6 +425,7 @@ class DiscogClient(discord.Client):
             logger.warning('run_turn: channel not set')
             return
 
+        inputtime = int(time.time() * 1000)
         firsttime = (glkstate is None or not glkstate.islive())
 
         gamefile = os.path.join(self.gamesdir, playchan.game.hash, playchan.game.filename)
@@ -556,6 +558,24 @@ class DiscogClient(discord.Client):
         put_glkstate_for_session(self, playchan.session, glkstate)
 
         update_session_movecount(self, playchan.session)
+
+        outputtime = int(time.time() * 1000)
+        tradat = {
+            "format": "glkote",
+            "input": input,
+            "output": update,
+            "sessionId": playchan.sessid,
+            "label": playchan.game.filename,
+            "timestamp": inputtime,
+            "outtimestamp": outputtime
+        }
+        try:
+            trapath = os.path.join(autosavedir, 'transcript.glktra')
+            with open(trapath, 'a') as outfl:
+                json.dump(tradat, outfl)
+                outfl.write('\n')
+        except Exception as ex:
+            logger.warning('Failed to write transcript: %s', ex, exc_info=ex)
 
         # Display the output.
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
