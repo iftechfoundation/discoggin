@@ -564,7 +564,7 @@ class DiscogClient(discord.Client):
             "format": "glkote",
             "input": input,
             "output": update,
-            "sessionId": playchan.sessid,
+            "sessionId": str(playchan.sessid),
             "label": playchan.game.filename,
             "timestamp": inputtime,
             "outtimestamp": outputtime
