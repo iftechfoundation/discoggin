@@ -1,6 +1,7 @@
 import os, os.path
 import time
 import json
+import collections
 import logging
 import sqlite3
 import asyncio
@@ -20,6 +21,7 @@ from .sessions import get_playchannels, get_playchannels_for_server, get_valid_p
 from .glk import create_metrics
 from .glk import parse_json
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
+from .glk import stanza_reader, storywindat_from_stanza
 
 _appcmds = []
 
@@ -239,7 +241,33 @@ class DiscogClient(discord.Client):
         # At least one, but no more than ten, please
         count = min(10, count)
         count = max(1, count)
+
+        autosavedir = os.path.join(self.autosavedir, playchan.session.sessdir)
+        trapath = os.path.join(autosavedir, 'transcript.glktra')
+
+        if not os.path.exists(trapath):
+            await interaction.response.send_message('No transcript is available.')
+            return
+
+        storywindat = []
+        try:
+            reader = stanza_reader(trapath)
+            # tail recipe from itertools docs
+            tailreader = iter(collections.deque(reader, maxlen=count))
+            for stanza in tailreader:
+                ls = storywindat_from_stanza(stanza)
+                if ls:
+                    storywindat.extend(ls)
+        except Exception as ex:
+            self.logger.error('Transcript: %s', ex, exc_info=ex)
+            await interaction.response.send_message('Transcript error: %s' % (ex,))
+            return
+        
         await interaction.response.send_message('Recapping last %d commands.' % (count,))
+        
+        # Display the output.
+        outls = [ content_to_markup(val) for val in storywindat ]
+        await self.print_lines(outls, interaction.channel, 'RECAP\n')
         
     @appcmd('install', description='Download and install a game file for play',
             argdesc={ 'url':'Game file URL' })
