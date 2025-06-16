@@ -74,6 +74,25 @@ class DiscogClient(discord.Client):
         self.db = sqlite3.connect(self.dbfile)
         self.db.isolation_level = None   # autocommit
 
+    async def print_lines(self, outls, chan, prefix=None):
+        """Print a bunch of lines (paragraphs) to the Discord channel.
+        They should already be formatted in Discord markup.
+        Add prefix if provided.
+        ### this must be shorter than the safety margin
+        """
+        # Optimize to fit in the fewest number of Discord messages.
+        outls = rebalance_output(outls)
+
+        first = True
+        for out in outls:
+            if not first:
+                # Short sleep to avoid rate-limiting.
+                await asyncio.sleep(0.25)
+            if prefix:
+                out = prefix+out
+            await chan.send(out)
+            first = False
+
     async def setup_hook(self):
         """Called when the client is starting up. We have not yet connected
         to Discord, but we have entered the async regime.
@@ -579,19 +598,14 @@ class DiscogClient(discord.Client):
 
         # Display the output.
         outls = [ content_to_markup(val) for val in glkstate.storywindat ]
-        outls = rebalance_output(outls)
-        printcount = 0
-        for out in outls:
-            printcount += len(out)
-            await chan.send('>\n'+out)
+        printcount = sum([ len(out) for out in outls ])
+        await self.print_lines(outls, chan, '>\n')
 
         if printcount <= 4:
             # No story output, or not much. Try showing the status line.
             outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
-            outls = rebalance_output(outls)
-            for out in outls:
-                printcount += len(out)
-                await chan.send('|\n'+out)
+            printcount = sum([ len(out) for out in outls ])
+            await self.print_lines(outls, chan, '|\n')
 
         if printcount <= 4:
             await chan.send('(no game output)')
