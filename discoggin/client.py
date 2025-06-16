@@ -20,6 +20,7 @@ from .sessions import get_sessions, get_session_by_id, get_sessions_for_server, 
 from .sessions import get_playchannels, get_playchannels_for_server, get_valid_playchannel, get_playchannel_for_session
 from .glk import create_metrics
 from .glk import parse_json
+from .glk import ContentLine
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 from .glk import stanza_reader, storywindat_from_stanza
 
@@ -249,15 +250,14 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('No transcript is available.')
             return
 
-        storywindat = []
+        # Fake in the initial prompt...
+        storywindat = [ ContentLine('>') ]
         try:
             reader = stanza_reader(trapath)
             # tail recipe from itertools docs
             tailreader = iter(collections.deque(reader, maxlen=count))
             for stanza in tailreader:
-                ls = storywindat_from_stanza(stanza)
-                if ls:
-                    storywindat.extend(ls)
+                storywindat_from_stanza(stanza, storywindat=storywindat)
         except Exception as ex:
             self.logger.error('Transcript: %s', ex, exc_info=ex)
             await interaction.response.send_message('Transcript error: %s' % (ex,))

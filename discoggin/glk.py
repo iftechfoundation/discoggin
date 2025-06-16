@@ -230,15 +230,18 @@ def strkeydict(map):
 def intkeydict(map):
     return dict([ (int(key), val) for (key, val) in map.items() ])
 
-def storywindat_from_stanza(stanza):
+def storywindat_from_stanza(stanza, storywindat=None):
     """Look at a stanza (as from stanza_reader()), extract the story
     window output, and return it as a list of ContentLines.
+    If storywindat is provided, append to it.
 
     This is similar to what accept_update() does, but it's simpler
     and standalone. (That is, it doesn't operate as part of a GlkState.)
     It is used for displaying transcripts.
     """
-    storywindat = []
+    if storywindat is None:
+        storywindat = []
+        
     output = stanza.get('output')
     if not output:
         return []
@@ -254,6 +257,7 @@ def storywindat_from_stanza(stanza):
                     storywindat[-1].extend(dat)
                 else:
                     storywindat.append(dat)
+                    
     return storywindat
 
 class ContentLine:
