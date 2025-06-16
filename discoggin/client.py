@@ -23,13 +23,13 @@ from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 
 _appcmds = []
 
-def appcmd(name, description):
+def appcmd(name, description, argdesc=None):
     """A decorator for slash commands.
     The discord module provides such a decorator but I don't like it.
     I wrote this one instead.
     """
     def decorator(func):
-        _appcmds.append( (func.__name__, name, description) )
+        _appcmds.append( (func.__name__, name, description, argdesc) )
         return func
     return decorator
 
@@ -61,9 +61,12 @@ class DiscogClient(discord.Client):
         self.tree = discord.app_commands.CommandTree(self)
 
         # Add all the slash commands noted by the @appcmd decorator.
-        for (key, name, description) in _appcmds:
+        for (key, name, description, argdesc) in _appcmds:
             callback = getattr(self, key)
             cmd = discord.app_commands.Command(name=name, callback=callback, description=description)
+            if argdesc:
+                for akey, adesc in argdesc.items():
+                    cmd._params[akey].description = adesc
             self.tree.add_command(cmd)
 
         # Our async HTTP client session.
@@ -222,7 +225,8 @@ class DiscogClient(discord.Client):
         outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
         await self.print_lines(outls, chan, '|\n')
 
-    @appcmd('recap', description='Recap the last few commands')
+    @appcmd('recap', description='Recap the last few commands',
+            argdesc={ 'count':'Number of commands to recap' })
     async def on_cmd_recap(self, interaction, count:int=3):
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
@@ -237,7 +241,8 @@ class DiscogClient(discord.Client):
         count = max(1, count)
         await interaction.response.send_message('Recapping last %d commands.' % (count,))
         
-    @appcmd('install', description='Download and install a game file for play')
+    @appcmd('install', description='Download and install a game file for play',
+            argdesc={ 'url':'Game file URL' })
     async def on_cmd_install(self, interaction, url:str):
         playchan = get_valid_playchannel(self, interaction=interaction)
         if not playchan:
@@ -319,7 +324,8 @@ class DiscogClient(discord.Client):
         ### is there a message size limit here?
         await interaction.response.send_message(val)
         
-    @appcmd('newsession', description='Start a new game session in this channel')
+    @appcmd('newsession', description='Start a new game session in this channel',
+            argdesc={ 'game':'Game name' })
     async def on_cmd_newsession(self, interaction, game:str):
         gamearg = game
         playchan = get_valid_playchannel(self, interaction=interaction)
@@ -336,7 +342,8 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
         
-    @appcmd('select', description='Select a game or session to play in this channel')
+    @appcmd('select', description='Select a game or session to play in this channel',
+            argdesc={ 'game':'Game name or session number' })
     async def on_cmd_select(self, interaction, game:str):
         gamearg = game
         playchan = get_valid_playchannel(self, interaction=interaction)
