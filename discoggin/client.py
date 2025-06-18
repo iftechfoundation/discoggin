@@ -329,7 +329,7 @@ class DiscogClient(discord.Client):
         """
         gamels = get_gamelist(self)
         if not gamels:
-            await interaction.response.send_message('No games downloaded')
+            await interaction.response.send_message('No games are installed. (**/install URL** to install one.)')
             return
         ls = [ 'Downloaded games available for play: (**/select** one)' ]
         for game in gamels:
@@ -344,7 +344,7 @@ class DiscogClient(discord.Client):
         """
         sessls = get_sessions_for_server(self, interaction.guild_id)
         if not sessls:
-            await interaction.response.send_message('No game sessions in progress')
+            await interaction.response.send_message('No game sessions are in progress.')
             return
         sessls.sort(key=lambda sess: -sess.lastupdate)
         gamemap = get_gamemap(self)
@@ -376,7 +376,7 @@ class DiscogClient(discord.Client):
         self.cache_playchannels()
         chanls = get_playchannels_for_server(self, interaction.guild_id, withgame=True)
         if not chanls:
-            await interaction.response.send_message('Discoggin is not available on this Discord server')
+            await interaction.response.send_message('Discoggin is not available on this Discord server.')
             return
         ls = []
         for playchan in chanls:
