@@ -307,7 +307,7 @@ class DiscogClient(discord.Client):
         if '/' not in url:
             # Special case
             if url == '?':
-                attls = self.attachments.getlist(interaction.channel.id)
+                attls = self.attachments.getlist(interaction.channel)
                 if not attls:
                     await interaction.response.send_message('No recent file uploads to this channel.')
                     return
@@ -527,7 +527,7 @@ class DiscogClient(discord.Client):
         if message.attachments:
             # keep track of file attachments
             for obj in message.attachments:
-                self.attachments.tryadd(obj, message.channel.id)
+                self.attachments.tryadd(obj, message.channel)
         
         cmd = extract_command(message.content)
         if not cmd:

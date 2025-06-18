@@ -5,7 +5,12 @@ class AttachList:
         # maps channels to lists of Attachments
         self.map = {}
 
-    def tryadd(self, obj, chanid):
+    def tryadd(self, obj, chan):
+        """Add an attachment to the list associated with a channel, if
+        it looks like a game file.
+        The arguments are a Discord attachment and a Discord channel.
+        """
+        chanid = chan.id
         try:
             att = Attachment(obj)
         except:
@@ -24,7 +29,12 @@ class AttachList:
                 return
         self.map[chanid].append(att)
 
-    def getlist(self, chanid):
+    def getlist(self, chan):
+        """Get the list of attachments associated with a channel.
+        The argument is a Discord channel; the result is a list of
+        our Attachment objects.
+        """
+        chanid = chan.id
         if chanid not in self.map:
             return []
         return list(self.map[chanid])
