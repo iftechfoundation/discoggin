@@ -19,12 +19,12 @@ class AttachList:
             # Doesn't look like a game file.
             return
 
-        print('### adding', att, att.url, 'to', chanid)
         if chanid not in self.map:
             self.map[chanid] = []
         for oatt in self.map[chanid]:
             if oatt.url == att.url:
                 # Already got this one. Bump the timestamp.
+                # (This doesn't really help; Discord doesn't check for duplicate files. Let's pretend it will someday.)
                 oatt.timestamp = att.timestamp
                 return
         self.map[chanid].append(att)
