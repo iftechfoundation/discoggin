@@ -303,6 +303,25 @@ class DiscogClient(discord.Client):
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
             return
+
+        if '/' not in url:
+            # Special case
+            if url == '?':
+                attls = self.attachments.getlist(playchan.chanid)
+                if not attls:
+                    await interaction.response.send_message('No recent file uploads to this channel.')
+                    return
+                ls = [ 'Recently uploaded files:' ]
+                for att in attls:
+                    ls.append('- %s, <t:%s:f>' % (att.filename, int(att.timestamp),))
+                val = '\n'.join(ls)
+                ### is there a message size limit here?
+                await interaction.response.send_message(val)
+                return
+                    
+                
+            await interaction.response.send_message('### not implemented')
+            return
         
         try:
             res = await download_game_url(self, url)

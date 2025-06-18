@@ -16,6 +16,11 @@ class AttachList:
                 return
         self.map[chanid].append(att)
 
+    def getlist(self, chanid):
+        if chanid not in self.map:
+            return []
+        return self.map[chanid]
+
 class Attachment:
     def __init__(self, obj):
         """The argument is a Discord Attachment object.
