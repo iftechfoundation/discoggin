@@ -63,8 +63,9 @@ pat_alldots = re.compile('^[.]*$')
 
 download_nonce = 1
 
-async def download_game_url(app, url):
+async def download_game_url(app, url, filename=None):
     """Download a game and install it in gamesdir.
+    If filename is not provided, slice it off the URL.
     On success, return a GameFile. On error, return a string describing
     the error. (Sorry, that's messy. Pretend it's a Result sort of thing.)
     """
@@ -76,11 +77,12 @@ async def download_game_url(app, url):
         return 'Download URL must start with `http://` or `https://`'
 
     ### reject .zip here too?
-    
-    _, _, filename = url.rpartition('/')
-    filename = urllib.parse.unquote(filename)
-    if pat_alldots.match(filename) or '/' in filename:
-        return 'URL does not appear to be a file: %s' % (url,)
+
+    if not filename:
+        _, _, filename = url.rpartition('/')
+        filename = urllib.parse.unquote(filename)
+        if pat_alldots.match(filename) or '/' in filename:
+            return 'URL does not appear to be a file: %s' % (url,)
 
     download_nonce += 1
     tmpfile = '_tmp_%d_%d_%s' % (time.time(), download_nonce, filename,)

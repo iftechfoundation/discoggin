@@ -304,6 +304,8 @@ class DiscogClient(discord.Client):
             await interaction.response.send_message('Discoggin does not play games in this channel.')
             return
 
+        filename = None
+        
         if '/' not in url:
             # Special case
             if url == '?':
@@ -325,10 +327,11 @@ class DiscogClient(discord.Client):
                 await interaction.response.send_message('You must name a URL or a recently uploaded file.')
                 return
             url = att.url
+            filename = att.filename
             # continue...
         
         try:
-            res = await download_game_url(self, url)
+            res = await download_game_url(self, url, filename)
         except Exception as ex:
             self.logger.error('Download: %s', ex, exc_info=ex)
             await interaction.response.send_message('Download error: %s' % (ex,))
