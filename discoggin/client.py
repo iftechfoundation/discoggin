@@ -145,6 +145,8 @@ class DiscogClient(discord.Client):
         
     @appcmd('start', description='Start the current game')
     async def on_cmd_start(self, interaction):
+        """/start
+        """
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -169,6 +171,8 @@ class DiscogClient(discord.Client):
     
     @appcmd('forcequit', description='Force the current game to end')
     async def on_cmd_stop(self, interaction):
+        """/forcequit
+        """
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -189,6 +193,8 @@ class DiscogClient(discord.Client):
 
     @appcmd('files', description='List the save files for the current session')
     async def on_cmd_listfiles(self, interaction):
+        """/files
+        """
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -210,6 +216,8 @@ class DiscogClient(discord.Client):
         
     @appcmd('status', description='Display the status window')
     async def on_cmd_status(self, interaction):
+        """/status
+        """
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -230,6 +238,8 @@ class DiscogClient(discord.Client):
     @appcmd('recap', description='Recap the last few commands',
             argdesc={ 'count':'Number of commands to recap' })
     async def on_cmd_recap(self, interaction, count:int=3):
+        """/recap NUM
+        """
         playchan = get_valid_playchannel(self, interaction=interaction, withgame=True)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -271,6 +281,8 @@ class DiscogClient(discord.Client):
     @appcmd('install', description='Download and install a game file for play',
             argdesc={ 'url':'Game file URL' })
     async def on_cmd_install(self, interaction, url:str):
+        """/install URL
+        """
         playchan = get_valid_playchannel(self, interaction=interaction)
         if not playchan:
             await interaction.response.send_message('Discoggin does not play games in this channel.')
@@ -297,6 +309,8 @@ class DiscogClient(discord.Client):
 
     @appcmd('games', description='List downloaded games')
     async def on_cmd_gamelist(self, interaction):
+        """/games
+        """
         gamels = get_gamelist(self)
         if not gamels:
             await interaction.response.send_message('No games downloaded')
@@ -310,6 +324,8 @@ class DiscogClient(discord.Client):
                 
     @appcmd('sessions', description='List game sessions')
     async def on_cmd_sessionlist(self, interaction):
+        """/sessions
+        """
         sessls = get_sessions_for_server(self, interaction.guild_id)
         if not sessls:
             await interaction.response.send_message('No game sessions in progress')
@@ -336,6 +352,8 @@ class DiscogClient(discord.Client):
 
     @appcmd('channels', description='List channels that we can play on')
     async def on_cmd_channellist(self, interaction):
+        """/channels
+        """
         ### good place to update the channels cache
         chanls = get_playchannels_for_server(self, interaction.guild_id, withgame=True)
         if not chanls:
@@ -354,6 +372,8 @@ class DiscogClient(discord.Client):
     @appcmd('newsession', description='Start a new game session in this channel',
             argdesc={ 'game':'Game name' })
     async def on_cmd_newsession(self, interaction, game:str):
+        """/newsession GAME
+        """
         gamearg = game
         playchan = get_valid_playchannel(self, interaction=interaction)
         if not playchan:
