@@ -311,6 +311,7 @@ class DiscogClient(discord.Client):
                 if not attls:
                     await interaction.response.send_message('No recent file uploads to this channel.')
                     return
+                attls.sort(key=lambda att:-att.timestamp)
                 ls = [ 'Recently uploaded files:' ]
                 for att in attls:
                     ls.append('- %s, <t:%s:f>' % (att.filename, int(att.timestamp),))

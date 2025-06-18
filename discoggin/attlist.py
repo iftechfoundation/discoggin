@@ -19,7 +19,7 @@ class AttachList:
     def getlist(self, chanid):
         if chanid not in self.map:
             return []
-        return self.map[chanid]
+        return list(self.map[chanid])
 
 class Attachment:
     def __init__(self, obj):
