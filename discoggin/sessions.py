@@ -48,12 +48,16 @@ class PlayChannel:
             return logging.getLogger('cli.s-')
     
 def get_sessions(app):
+    """Get all sessions (for all servers)
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM sessions')
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     return sessls
     
 def get_session_by_id(app, sessid):
+    """Get one session by ID (or None).
+    """
     try:
         sessid = int(sessid)
     except:
@@ -66,12 +70,20 @@ def get_session_by_id(app, sessid):
     return Session(*tup)
 
 def get_sessions_for_server(app, gid):
+    """Get all sessions for a given server.
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM sessions WHERE gid = ?', (gid,))
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     return sessls
     
 def get_available_session_for_hash(app, hash, gid):
+    """Get an *unused* session for a given game, on a given server.
+    The game is identified by hash. If all sessions for game are in
+    use by some channel, or if there are no sessions, this returns None.
+    If there are several available sessions, this returns the most
+    recently-used one.
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM sessions WHERE hash = ? AND gid = ?', (hash, gid,))
     sessls = [ Session(*tup) for tup in res.fetchall() ]
@@ -89,6 +101,8 @@ def get_available_session_for_hash(app, hash, gid):
     return availls[0]
 
 def create_session(app, game, gid):
+    """Create a new session for a game on a server.
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT sessid FROM sessions')
     idlist = [ tup[0] for tup in res.fetchall() ]
@@ -101,6 +115,9 @@ def create_session(app, game, gid):
     return Session(*tup)
 
 def delete_session(app, sessid):
+    """Delete a session and all its files (autosave and save files).
+    This is called from the command-line.
+    """
     session = get_session_by_id(app, sessid)
     if session is None:
         return
@@ -115,12 +132,18 @@ def delete_session(app, sessid):
     curs.execute('DELETE FROM sessions WHERE sessid = ?', (sessid,))
 
 def get_playchannels(app):
+    """Get all channels (for all servers).
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels')
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
     return chanls
 
 def get_playchannels_for_server(app, gid, withgame=False):
+    """Get all channels for a given server.
+    If withgame is true, this gets the session and game info for
+    each channel as well.
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels WHERE gid = ?', (str(gid),))
     chanls = [ PlayChannel(*tup) for tup in res.fetchall() ]
@@ -135,6 +158,8 @@ def get_playchannels_for_server(app, gid, withgame=False):
     return chanls
 
 def get_playchannel(app, gckey):
+    """Get one channel by ID (or None).
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels WHERE gckey = ?', (gckey,))
     tup = res.fetchone()
@@ -143,6 +168,9 @@ def get_playchannel(app, gckey):
     return PlayChannel(*tup)
 
 def get_playchannel_for_session(app, sessid):
+    """Get the channel playing a given session, by session ID.
+    If no channel is playing that session, return None.
+    """
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels where sessid = ?', (sessid,))
     # There shouldn't be more than one.
@@ -152,6 +180,13 @@ def get_playchannel_for_session(app, sessid):
     return PlayChannel(*tup)
 
 def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
+    """Get the channel for a given interaction or Discord message.
+    You must provide one or the other.
+    If withgame is true, this gets the session and game info for
+    the channel as well.
+    This is called very frequently (for every message on the server!) so
+    it relies on a cache of known play-channels for fast rejection.
+    """
     channame = None
     if interaction:
         gid = interaction.guild_id
@@ -201,10 +236,14 @@ def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
     return playchan
 
 def set_channel_session(app, playchan, session):
+    """Set the current session for a given channel.
+    """
     curs = app.db.cursor()
     curs.execute('UPDATE channels SET sessid = ? WHERE gckey = ?', (session.sessid, playchan.gckey,))
 
 def update_session_movecount(app, session, movecount=None):
+    """Update the movecount and current time for a session.
+    """
     if movecount is None:
         movecount = session.movecount + 1
     curs = app.db.cursor()
