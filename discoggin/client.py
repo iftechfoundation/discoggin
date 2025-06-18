@@ -386,8 +386,14 @@ class DiscogClient(discord.Client):
             gameargint = None
         if gameargint is not None:
             await self.on_cmd_select_session(interaction, playchan, gameargint)
-            return
+        else:
+            await self.on_cmd_select_game(interaction, playchan, gamearg)
             
+    async def on_cmd_select_game(self, interaction, playchan, gamearg):
+        """/select GAME (a game name)
+        This is called by on_cmd_select(). It is responsible for responding
+        to the interaction.
+        """
         game = get_game_by_name(self, gamearg)
         if not game:
             await interaction.response.send_message('Game not found: "%s"' % (gamearg,))
