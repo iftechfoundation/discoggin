@@ -58,6 +58,7 @@ class DiscogClient(discord.Client):
 
         super().__init__(intents=intents)
 
+        self.playchannels = set()  # of gckeys
         self.inflight = set()  # of session ids
 
         # Container for slash commands.
@@ -107,6 +108,8 @@ class DiscogClient(discord.Client):
         # event loop.
         headers = { 'user-agent': 'Discoggin-IF-Terp' }
         self.httpsession = aiohttp.ClientSession(headers=headers)
+
+        self.cache_playchannels()
         
         if self.cmdsync:
             # Push our slash commands to Discord. We only need to do
@@ -141,6 +144,15 @@ class DiscogClient(discord.Client):
         """
         self.logger.info('Logged in as %s', self.user)
 
+    def cache_playchannels(self):
+        """Grab the list of valid playchannels and store it in memory.
+        We will use this for fast channel-checking.
+        """
+        ls = get_playchannels(self)
+        self.playchannels.clear()
+        for chan in ls:
+            self.playchannels.add(chan.gckey)
+        
     # Slash command implementations.
         
     @appcmd('start', description='Start the current game')
@@ -353,8 +365,11 @@ class DiscogClient(discord.Client):
     @appcmd('channels', description='List channels that we can play on')
     async def on_cmd_channellist(self, interaction):
         """/channels
+        This also re-checks the valid channel list. This is a hack.
+        (We should have a way for the command-line API to tell the
+        running instance to recache.)
         """
-        ### good place to update the channels cache
+        self.cache_playchannels()
         chanls = get_playchannels_for_server(self, interaction.guild_id, withgame=True)
         if not chanls:
             await interaction.response.send_message('Discoggin is not available on this Discord server')
