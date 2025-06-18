@@ -264,6 +264,8 @@ class DiscogClient(discord.Client):
         count = min(10, count)
         count = max(1, count)
 
+        playchan.logger().info('recap %d', count)
+            
         autosavedir = os.path.join(self.autosavedir, playchan.session.sessdir)
         trapath = os.path.join(autosavedir, 'transcript.glktra')
 
