@@ -39,6 +39,17 @@ class AttachList:
             return []
         return list(self.map[chanid])
 
+    def findbyname(self, filename, chan):
+        """Look through the list of attachments and find one with a given
+        (exact) filename. If there are several, return the most recent.
+        """
+        ls = self.getlist(chan)
+        ls.sort(key=lambda att:-att.timestamp)
+        for att in ls:
+            if filename == att.filename:
+                return att
+        return None
+
 class Attachment:
     def __init__(self, obj):
         """The argument is a Discord Attachment object.

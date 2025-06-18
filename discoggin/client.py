@@ -320,9 +320,12 @@ class DiscogClient(discord.Client):
                 await interaction.response.send_message(val)
                 return
                     
-                
-            await interaction.response.send_message('### not implemented')
-            return
+            att = self.attachments.findbyname(url, interaction.channel)
+            if not att:
+                await interaction.response.send_message('You must name a URL or a recently uploaded file.')
+                return
+            url = att.url
+            # continue...
         
         try:
             res = await download_game_url(self, url)
