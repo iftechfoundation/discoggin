@@ -372,6 +372,8 @@ class DiscogClient(discord.Client):
     @appcmd('select', description='Select a game or session to play in this channel',
             argdesc={ 'game':'Game name or session number' })
     async def on_cmd_select(self, interaction, game:str):
+        """/select [ GAME | SESSION ]
+        """
         gamearg = game
         playchan = get_valid_playchannel(self, interaction=interaction)
         if not playchan:
@@ -383,11 +385,7 @@ class DiscogClient(discord.Client):
         except:
             gameargint = None
         if gameargint is not None:
-            session = get_session_by_id(self, gameargint)
-            if not session or session.gid != interaction.guild_id:
-                await interaction.response.send_message('No session %d.' % (gameargint,))
-                return
-            await self.on_cmd_select_session(interaction, playchan, session)
+            await self.on_cmd_select_session(interaction, playchan, gameargint)
             return
             
         game = get_game_by_name(self, gamearg)
@@ -417,9 +415,15 @@ class DiscogClient(discord.Client):
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
 
-    async def on_cmd_select_session(self, interaction, playchan, session):
+    async def on_cmd_select_session(self, interaction, playchan, sessid):
+        """/select SESSION (a session number)
+        This is called by on_cmd_select(). It is responsible for responding
+        to the interaction.
         """
-        """
+        session = get_session_by_id(self, sessid)
+        if not session or session.gid != interaction.guild_id:
+            await interaction.response.send_message('No session %d.' % (sessid,))
+            return
         prevchan = get_playchannel_for_session(self, session.sessid)
         if prevchan:
             if prevchan.chanid == playchan.chanid:
