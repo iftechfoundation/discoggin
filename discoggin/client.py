@@ -102,7 +102,6 @@ class DiscogClient(discord.Client):
     async def setup_hook(self):
         """Called when the client is starting up. We have not yet connected
         to Discord, but we have entered the async regime.
-        ### TODO: Make this a CLI command really.
         """
         # Create the HTTP session, which must happen inside the async
         # event loop.
