@@ -23,6 +23,7 @@ from .glk import parse_json
 from .glk import ContentLine
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
 from .glk import stanza_reader, storywindat_from_stanza
+from .attlist import AttachList
 
 _appcmds = []
 
@@ -60,6 +61,7 @@ class DiscogClient(discord.Client):
 
         self.playchannels = set()  # of gckeys
         self.inflight = set()  # of session ids
+        self.attachments = AttachList()
 
         # Container for slash commands.
         self.tree = discord.app_commands.CommandTree(self)
