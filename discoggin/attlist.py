@@ -5,13 +5,21 @@ class AttachList:
         # maps channels to lists of Attachments
         self.map = {}
 
-    def add(self, obj, chanid):
-        att = Attachment(obj)
+    def tryadd(self, obj, chanid):
+        try:
+            att = Attachment(obj)
+        except:
+            return
+        if not detect_format(None, att.filename):
+            # Doesn't look like a game file.
+            return
+
+        print('### adding', att, att.url, 'to', chanid)
         if chanid not in self.map:
-            self.map = []
+            self.map[chanid] = []
         for oatt in self.map[chanid]:
             if oatt.url == att.url:
-                # Already got this one. Bump the timestamp
+                # Already got this one. Bump the timestamp.
                 oatt.timestamp = att.timestamp
                 return
         self.map[chanid].append(att)
@@ -34,3 +42,7 @@ class Attachment:
         
     def __repr__(self):
         return '<Attachment "%s">' % (self.filename,)
+
+
+# Late imports
+from .games import detect_format
