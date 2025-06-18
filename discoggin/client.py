@@ -387,27 +387,7 @@ class DiscogClient(discord.Client):
             if not session or session.gid != interaction.guild_id:
                 await interaction.response.send_message('No session %d.' % (gameargint,))
                 return
-            prevchan = get_playchannel_for_session(self, session.sessid)
-            if prevchan:
-                if prevchan.chanid == playchan.chanid:
-                    await interaction.response.send_message('This channel is already using session %d.' % (session.sessid,))
-                else:
-                    await interaction.response.send_message('Session %d is already being used in channel <#%s>.' % (session.sessid, prevchan.chanid,))
-                return
-            set_channel_session(self, playchan, session)
-            game = get_game_by_hash(self, session.hash)
-            if not game:
-                playchan.logger().warning('activated session, but could not find game')
-                await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
-                return
-            session.logger().info('selected "%s" in #%s', game.filename, playchan.channame)
-            await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
-            # Display the status line of this session
-            glkstate = get_glkstate_for_session(self, session)
-            if glkstate:
-                chan = interaction.channel
-                outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
-                await self.print_lines(outls, chan, '|\n')
+            await self.on_cmd_select_session(interaction, playchan, session)
             return
             
         game = get_game_by_name(self, gamearg)
@@ -436,6 +416,31 @@ class DiscogClient(discord.Client):
         session.logger().info('new session for "%s" in #%s', game.filename, playchan.channame)
         await interaction.response.send_message('Began a new session for "%s" (**/start** to start the game.)' % (game.filename,))
         # No status line, game hasn't started yet
+
+    async def on_cmd_select_session(self, interaction, playchan, session):
+        """
+        """
+        prevchan = get_playchannel_for_session(self, session.sessid)
+        if prevchan:
+            if prevchan.chanid == playchan.chanid:
+                await interaction.response.send_message('This channel is already using session %d.' % (session.sessid,))
+            else:
+                await interaction.response.send_message('Session %d is already being used in channel <#%s>.' % (session.sessid, prevchan.chanid,))
+            return
+        set_channel_session(self, playchan, session)
+        game = get_game_by_hash(self, session.hash)
+        if not game:
+            playchan.logger().warning('activated session, but could not find game')
+            await interaction.response.send_message('Activated session %s, but cannot find associated game' % (session.sessid,))
+            return
+        session.logger().info('selected "%s" in #%s', game.filename, playchan.channame)
+        await interaction.response.send_message('Activated session %d for "%s"' % (session.sessid, game.filename,))
+        # Display the status line of this session
+        glkstate = get_glkstate_for_session(self, session)
+        if glkstate:
+            chan = interaction.channel
+            outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+            await self.print_lines(outls, chan, '|\n')
         
     async def on_message(self, message):
         """Event handler for regular Discord chat messages.
