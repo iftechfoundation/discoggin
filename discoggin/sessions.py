@@ -152,7 +152,6 @@ def get_playchannel_for_session(app, sessid):
     return PlayChannel(*tup)
 
 def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
-    ### We call this on every message event, so it would be really good to cache the channel list. With their names!
     channame = None
     if interaction:
         gid = interaction.guild_id
@@ -180,6 +179,10 @@ def get_valid_playchannel(app, interaction=None, message=None, withgame=False):
         return None
     
     gckey = '%s-%s' % (gid, chanid,)
+    if gckey not in app.playchannels:
+        # Fast check
+        return None
+    
     curs = app.db.cursor()
     res = curs.execute('SELECT * FROM channels WHERE gckey = ?', (gckey,))
     tup = res.fetchone()
