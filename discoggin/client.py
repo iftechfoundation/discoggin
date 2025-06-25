@@ -538,6 +538,8 @@ class DiscogClient(discord.Client):
         cmd = extract_command(message.content)
         if not cmd:
             # silently ignore messages that don't look like commands
+            # but record the message as a comment!
+            self.record_comment(message, playchan)
             return
         
         if not playchan.game:
@@ -557,6 +559,36 @@ class DiscogClient(discord.Client):
             await self.run_turn(cmd, message.channel, playchan, glkstate)
         finally:
             self.inflight.discard(playchan.sessid)
+
+    def record_comment(self, message, playchan):
+        if not playchan.sessid:
+            return
+        if not message.author:
+            return
+        val = message.content.strip()
+        if not val:
+            return
+        text = '%s: %s' % (message.author.name, val,)
+        
+        outputtime = int(time.time() * 1000)
+        tradat = {
+            "format": "comment",
+            "sessionId": str(playchan.sessid),
+            "text": text,
+            "timestamp": outputtime
+        }
+        try:
+            autosavedir = os.path.join(self.autosavedir, playchan.session.sessdir)
+            if not os.path.exists(autosavedir):
+                os.mkdir(autosavedir)
+            
+            trapath = os.path.join(autosavedir, 'transcript.glktra')
+            with open(trapath, 'a') as outfl:
+                json.dump(tradat, outfl)
+                outfl.write('\n')
+        except Exception as ex:
+            logger.warning('Failed to write comment: %s', ex, exc_info=ex)
+
 
     async def run_turn(self, cmd, chan, playchan, glkstate):
         """Execute a turn by invoking an interpreter.
