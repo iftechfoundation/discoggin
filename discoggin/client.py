@@ -22,7 +22,7 @@ from .glk import create_metrics
 from .glk import parse_json
 from .glk import ContentLine
 from .glk import GlkState, get_glkstate_for_session, put_glkstate_for_session
-from .glk import stanza_reader, storywindat_from_stanza
+from .glk import stanza_reader, stanza_is_transcript, storywindat_from_stanza
 from .attlist import AttachList
 
 _appcmds = []
@@ -279,8 +279,10 @@ class DiscogClient(discord.Client):
         storywindat = [ ContentLine('>') ]
         try:
             reader = stanza_reader(trapath)
+            # skip comments and other non-glkote stanzas
+            trareader = filter(stanza_is_transcript, reader)
             # tail recipe from itertools docs
-            tailreader = iter(collections.deque(reader, maxlen=count))
+            tailreader = iter(collections.deque(trareader, maxlen=count))
             for stanza in tailreader:
                 storywindat_from_stanza(stanza, storywindat=storywindat)
         except Exception as ex:
