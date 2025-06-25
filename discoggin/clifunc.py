@@ -33,9 +33,11 @@ def cmd_cmdinstall(args, app):
     app.run(bottoken)
     print('slash commands installed')
 
+# We accept a full channel URL or a gckey.
+pat_channel = re.compile('^(?:https://discord.com/channels/)?([0-9]+)[/-]([0-9]+)$')
+
 def cmd_addchannel(args, app):
-    pat = re.compile('^https://discord.com/channels/([0-9]+)/([0-9]+)$')
-    match = pat.match(args.channelurl)
+    match = pat_channel.match(args.channelurl)
     if not match:
         print('argument must be a channel URL: https://discord.com/channels/X/Y')
         return
