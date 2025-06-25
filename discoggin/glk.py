@@ -230,6 +230,12 @@ def strkeydict(map):
 def intkeydict(map):
     return dict([ (int(key), val) for (key, val) in map.items() ])
 
+def stanza_is_transcript(sta):
+    """Returns true if the stanza is part of a transcript (as opposed
+    to a comment or metadata).
+    """
+    return sta.get('format') == 'glkote'
+            
 def storywindat_from_stanza(stanza, storywindat=None):
     """Look at a stanza (as from stanza_reader()), extract the story
     window output, and return it as a list of ContentLines.
@@ -338,12 +344,6 @@ def stanza_reader(path):
             yield obj
             buf = ''
 
-def stanza_is_transcript(sta):
-    """Returns true if the stanza is part of a transcript (as opposed
-    to a comment or metadata).
-    """
-    return sta.get('format') == 'glkote'
-            
 def parse_json(val):
     """Normally an interpreter returns a single JSON update stanza.
     However, errors aren't always tidy. We might get one or more error
