@@ -54,7 +54,25 @@ def cmd_addchannel(args, app):
     tup = (gckey, gid, chanid, None)
     curs.execute('INSERT INTO channels (gckey, gid, chanid, sessid) VALUES (?, ?, ?, ?)', tup)
     print('enabled channel')
-    
+
+def cmd_delchannel(args, app):
+    match = pat_channel.match(args.channelurl)
+    if not match:
+        print('argument must be a channel URL: https://discord.com/channels/X/Y')
+        return
+    gid = match.group(1)
+    chanid = match.group(2)
+    gckey = gid+'-'+chanid
+
+    curs = app.db.cursor()
+    res = curs.execute('SELECT * FROM channels WHERE gckey = ?', (gckey,))
+    if not res.fetchone():
+        print('channel is not enabled')
+        return
+
+    curs.execute('DELETE FROM channels WHERE gckey = ?', (gckey,))    
+    print('deleted channel')
+
 def cmd_delsession(args, app):
     session = get_session_by_id(app, args.sessionid)
     if session is None:
