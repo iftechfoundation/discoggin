@@ -246,7 +246,7 @@ class DiscogClient(discord.Client):
             return
         chan = interaction.channel
         await interaction.response.send_message('Status line displayed.', ephemeral=True)
-        outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+        outls = [ content_to_markup(val, glkstate.hyperlinklabels) for val in glkstate.statuswindat ]
         await self.print_lines(outls, chan, '|\n')
 
     @appcmd('recap', description='Recap the last few commands',
@@ -292,7 +292,7 @@ class DiscogClient(discord.Client):
         
         await interaction.response.send_message('Recapping last %d commands.' % (count,))
         
-        # Display the output.
+        # Display the output. (No hyperlink labels.)
         outls = [ content_to_markup(val) for val in storywindat ]
         await self.print_lines(outls, interaction.channel, 'RECAP\n')
         
@@ -479,7 +479,7 @@ class DiscogClient(discord.Client):
             glkstate = get_glkstate_for_session(self, session)
             if glkstate:
                 chan = interaction.channel
-                outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+                outls = [ content_to_markup(val, glkstate.hyperlinklabels) for val in glkstate.statuswindat ]
                 await self.print_lines(outls, chan, '|\n')
             return
         session = create_session(self, game, interaction.guild_id)
@@ -516,7 +516,7 @@ class DiscogClient(discord.Client):
         glkstate = get_glkstate_for_session(self, session)
         if glkstate:
             chan = interaction.channel
-            outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+            outls = [ content_to_markup(val, glkstate.hyperlinklabels) for val in glkstate.statuswindat ]
             await self.print_lines(outls, chan, '|\n')
         
     async def on_message(self, message):
@@ -757,13 +757,13 @@ class DiscogClient(discord.Client):
             logger.warning('Failed to write transcript: %s', ex, exc_info=ex)
 
         # Display the output.
-        outls = [ content_to_markup(val) for val in glkstate.storywindat ]
+        outls = [ content_to_markup(val, glkstate.hyperlinklabels) for val in glkstate.storywindat ]
         printcount = sum([ len(out) for out in outls ])
         await self.print_lines(outls, chan, '>\n')
 
         if printcount <= 4:
             # No story output, or not much. Try showing the status line.
-            outls = [ content_to_markup(val) for val in glkstate.statuswindat ]
+            outls = [ content_to_markup(val, glkstate.hyperlinklabels) for val in glkstate.statuswindat ]
             printcount = sum([ len(out) for out in outls ])
             await self.print_lines(outls, chan, '|\n')
 

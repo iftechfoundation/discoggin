@@ -14,7 +14,7 @@ def extract_command(msg):
     val = match.group(1)
     return val.strip()
 
-def content_to_markup(dat):
+def content_to_markup(dat, hyperlinklabels=None):
     """Convert a ContentLine object into a Discord message, using
     Discord markup as much as possible.
     Hyperlinks are rendered as "[#1][text]" -- that isn't Discord markup,
@@ -27,13 +27,14 @@ def content_to_markup(dat):
     for tup in dat.arr:
         text = tup[0]
         style = tup[1] if len(tup) > 1 else 'normal'
-        link = tup[2] if len(tup) > 2 else None
+        link = tup[2] if (len(tup) > 2 and hyperlinklabels) else None
         if link != curlink:
             if curlink is not None:
                 res.append(']')
             curlink = link
             if curlink is not None:
-                res.append('[#%s][' % (link,))
+                label = hyperlinklabels.get(link, '???')
+                res.append('[#%s][' % (label,))
         val = escape(text)
         if style == 'header' or style == 'subheader' or style == 'input':
             sval = '**'+val+'**'

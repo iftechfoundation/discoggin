@@ -47,7 +47,7 @@ class GlkState:
         self.windows = {}
         # This doesn't track multiple-window input the way it should,
         # nor distinguish hyperlink input state across multiple windows.
-        ### following should be an array?
+        ### following should be an array? gotta get the window in there too
         self.hyperlinklabels = {}  # link key to label
         self.hyperlinkkeys = {}    # link label to key
         self.lineinputwin = None
@@ -214,19 +214,19 @@ class GlkState:
             for tup in dat.arr:
                 if len(tup) > 2:
                     link = tup[2]
-                    if link in self.hyperlinkkeys:
+                    if link in self.hyperlinklabels:
                         continue
-                    self.hyperlinklabels[counter] = link
-                    self.hyperlinkkeys[link] = counter
+                    self.hyperlinkkeys[counter] = link
+                    self.hyperlinklabels[link] = counter
                     counter += 1
         for dat in self.statuswindat:
             for tup in dat.arr:
                 if len(tup) > 2:
                     link = tup[2]
-                    if link in self.hyperlinkkeys:
+                    if link in self.hyperlinklabels:
                         continue
-                    self.hyperlinklabels[counter] = link
-                    self.hyperlinkkeys[link] = counter
+                    self.hyperlinkkeys[counter] = link
+                    self.hyperlinklabels[link] = counter
                     counter += 1
 
     def construct_input(self, cmd):
