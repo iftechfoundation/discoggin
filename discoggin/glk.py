@@ -47,6 +47,7 @@ class GlkState:
         self.windows = {}
         # This doesn't track multiple-window input the way it should,
         # nor distinguish hyperlink input state across multiple windows.
+        self.hyperlinklabels = {}
         self.lineinputwin = None
         self.charinputwin = None
         self.specialinput = None
@@ -69,6 +70,8 @@ class GlkState:
             obj[key] = [ dat.to_jsonable() for dat in arr ]
         obj['statuslinestarts'] = strkeydict(self.statuslinestarts)
         obj['windows'] = strkeydict(self.windows)
+        if self.hyperlinklabels:
+            obj['hyperlinklabels'] = strkeydict(self.hyperlinklabels)
         return obj
 
     def islive(self):
@@ -86,6 +89,10 @@ class GlkState:
             setattr(state, key, ls)
         state.statuslinestarts = intkeydict(obj['statuslinestarts'])
         state.windows = intkeydict(obj['windows'])
+        if 'hyperlinklabels' in obj:
+            state.hyperlinklabels = intkeydict(obj['hyperlinklabels'])
+        else:
+            state.hyperlinklabels = {}
         return state
     
     def accept_update(self, update, extrainput=None):
