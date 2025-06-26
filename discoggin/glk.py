@@ -47,7 +47,9 @@ class GlkState:
         self.windows = {}
         # This doesn't track multiple-window input the way it should,
         # nor distinguish hyperlink input state across multiple windows.
-        self.hyperlinklabels = {}
+        ### following should be an array?
+        self.hyperlinklabels = {}  # link key to label
+        self.hyperlinkkeys = {}    # link label to key
         self.lineinputwin = None
         self.charinputwin = None
         self.specialinput = None
@@ -72,6 +74,7 @@ class GlkState:
         obj['windows'] = strkeydict(self.windows)
         if self.hyperlinklabels:
             obj['hyperlinklabels'] = strkeydict(self.hyperlinklabels)
+            # self.hyperlinkkeys is a back-cache
         return obj
 
     def islive(self):
@@ -91,8 +94,8 @@ class GlkState:
         state.windows = intkeydict(obj['windows'])
         if 'hyperlinklabels' in obj:
             state.hyperlinklabels = intkeydict(obj['hyperlinklabels'])
-        else:
-            state.hyperlinklabels = {}
+            for (key, label) in state.hyperlinklabels.items():
+                state.hyperlinkkeys[label] = key
         return state
     
     def accept_update(self, update, extrainput=None):
@@ -203,6 +206,28 @@ class GlkState:
                     self.hyperlinkinputwin = input.get('id')
                 #if input.get('mouse'):
                 #    self.mouseinputwin = input.get('id')
+
+        self.hyperlinklabels.clear()
+        self.hyperlinkkeys.clear()
+        counter = 1
+        for dat in self.storywindat:
+            for tup in dat.arr:
+                if len(tup) > 2:
+                    link = tup[2]
+                    if link in self.hyperlinkkeys:
+                        continue
+                    self.hyperlinklabels[counter] = link
+                    self.hyperlinkkeys[link] = counter
+                    counter += 1
+        for dat in self.statuswindat:
+            for tup in dat.arr:
+                if len(tup) > 2:
+                    link = tup[2]
+                    if link in self.hyperlinkkeys:
+                        continue
+                    self.hyperlinklabels[counter] = link
+                    self.hyperlinkkeys[link] = counter
+                    counter += 1
 
     def construct_input(self, cmd):
         """Given a player command string, construct a GlkOte input
