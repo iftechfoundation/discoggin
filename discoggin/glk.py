@@ -305,8 +305,7 @@ def extract_raw(line):
         if type(val) == str:
             res.add(val)
         else:
-            res.add(val.get('text', ''), val.get('style', 'normal'))
-            ### hyperlink
+            res.add(val.get('text', ''), val.get('style', 'normal'), val.get('hyperlink', None))
     return res
 
 def stanza_reader(path):
