@@ -236,6 +236,14 @@ class GlkState:
         (e.g. line+hypertext or line+timer), allow the player to
         specify both.
         """
+        if self.hyperlinkinputwin:
+            linklabel = command_is_hyperlink(cmd)
+            if linklabel is not None and linklabel in self.hyperlinkkeys:
+                linkkey = self.hyperlinkkeys[linklabel]
+                return {
+                    'type':'hyperlink', 'gen':self.generation,
+                    'window':self.hyperlinkinputwin, 'value':linkkey
+                }
         if self.lineinputwin:
             return {
                 'type':'line', 'gen':self.generation,
@@ -440,3 +448,7 @@ def create_metrics(width=None, height=None):
         'buffercharwidth':10, 'buffercharheight':12,
     }
     return res
+
+
+# Late imports
+from .markup import command_is_hyperlink

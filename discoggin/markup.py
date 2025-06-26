@@ -1,6 +1,7 @@
 import re
 
 pat_cmd = re.compile('^[\\s]*>(.*)$')
+pat_linkinput = re.compile('^#([0-9]+)$')
 
 def extract_command(msg):
     """See whether a Discord message is meant as a command input.
@@ -13,6 +14,18 @@ def extract_command(msg):
         return None
     val = match.group(1)
     return val.strip()
+
+def command_is_hyperlink(cmd):
+    """See whether a command looks like a hyperlink reference: "#12",
+    etc. Returns a number or None.
+    This is theoretically ambiguous, but it's only a problem if a game
+    expects both hyperlinks and line input of that form.
+    ### TODO: accept a bare number if there is no line/char input pending.
+    """
+    match = pat_linkinput.match(cmd)
+    if match:
+        return int(match.group(1))
+    return None
 
 def content_to_markup(dat, hyperlinklabels=None):
     """Convert a ContentLine object into a Discord message, using
