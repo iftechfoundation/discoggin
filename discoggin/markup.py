@@ -17,12 +17,23 @@ def extract_command(msg):
 def content_to_markup(dat):
     """Convert a ContentLine object into a Discord message, using
     Discord markup as much as possible.
+    Hyperlinks are rendered as "[#1][text]" -- that isn't Discord markup,
+    mind you. The user gets to figure it out.
     """
     ### has some bugs to do with whitespace. E.g. "_This _not_ that._"
     res = []
+    curlink = None
+    
     for tup in dat.arr:
         text = tup[0]
         style = tup[1] if len(tup) > 1 else 'normal'
+        link = tup[2] if len(tup) > 2 else None
+        if link != curlink:
+            if curlink is not None:
+                res.append(']')
+            curlink = link
+            if curlink is not None:
+                res.append('[#%s][' % (link,))
         val = escape(text)
         if style == 'header' or style == 'subheader' or style == 'input':
             sval = '**'+val+'**'
@@ -34,6 +45,10 @@ def content_to_markup(dat):
         else:
             sval = val
         res.append(sval)
+        
+    if curlink is not None:
+        res.append(']')
+    
     return ''.join(res)
 
 pat_singlechar = re.compile('[`*_<>\\[\\]\\\\]')
