@@ -210,7 +210,10 @@ class GlkState:
         self.hyperlinklabels.clear()
         self.hyperlinkkeys.clear()
         counter = 1
-        for dat in self.storywindat:
+        # We do the status window first, on the somewhat shaky theory
+        # that its links will be stable as the player takes turns
+        # (and looks only at the story window).
+        for dat in self.statuswindat:
             for tup in dat.arr:
                 if len(tup) > 2:
                     link = tup[2]
@@ -219,7 +222,7 @@ class GlkState:
                     self.hyperlinkkeys[counter] = link
                     self.hyperlinklabels[link] = counter
                     counter += 1
-        for dat in self.statuswindat:
+        for dat in self.storywindat:
             for tup in dat.arr:
                 if len(tup) > 2:
                     link = tup[2]
