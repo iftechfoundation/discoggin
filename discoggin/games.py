@@ -139,6 +139,9 @@ def detect_format(path, filename):
         return 'glulx'
     if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
         return 'zcode'
+    if ext == '.json':
+        # Oh, we could check for the full '.ink.json' suffix
+        return 'ink'
     return None
 
 def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir, autosavedir):
@@ -170,6 +173,14 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
         else:
             args = [ terp, '-C', '-H', '-m', '-T', 'transcript.txt', '-singleturn', '-filedir', savefiledir, '-onlyfiledir', '-autometrics', gamefile ]
         return (args, env)
+        
+    if format == 'ink':
+        terp = os.path.join(terpsdir, 'inkrun.js')
+        if firstrun:
+            args = [ terp, '--autodir', autosavedir, gamefile ]
+        else:
+            args = [ terp, '--autorestore', '--autodir', autosavedir, gamefile ]
+        return (args, {})
         
     return (None, None)
         
