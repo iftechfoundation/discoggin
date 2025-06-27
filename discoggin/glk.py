@@ -72,9 +72,9 @@ class GlkState:
             obj[key] = [ dat.to_jsonable() for dat in arr ]
         obj['statuslinestarts'] = strkeydict(self.statuslinestarts)
         obj['windows'] = strkeydict(self.windows)
-        if self.hyperlinklabels:
-            obj['hyperlinklabels'] = strkeydict(self.hyperlinklabels)
-            # self.hyperlinkkeys is a back-cache
+        if self.hyperlinkkeys:
+            obj['hyperlinkkeys'] = strkeydict(self.hyperlinkkeys)
+            # self.hyperlinklabels is a back-cache
         return obj
 
     def islive(self):
@@ -92,10 +92,10 @@ class GlkState:
             setattr(state, key, ls)
         state.statuslinestarts = intkeydict(obj['statuslinestarts'])
         state.windows = intkeydict(obj['windows'])
-        if 'hyperlinklabels' in obj:
-            state.hyperlinklabels = intkeydict(obj['hyperlinklabels'])
-            for (key, label) in state.hyperlinklabels.items():
-                state.hyperlinkkeys[label] = key
+        if 'hyperlinkkeys' in obj:
+            state.hyperlinkkeys = intkeydict(obj['hyperlinkkeys'])
+            for (label, key) in state.hyperlinkkeys.items():
+                state.hyperlinklabels[key] = label
         return state
     
     def accept_update(self, update, extrainput=None):
@@ -213,6 +213,8 @@ class GlkState:
         # We do the status window first, on the somewhat shaky theory
         # that its links will be stable as the player takes turns
         # (and looks only at the story window).
+        # Remember that the link (key) value isn't necessarily an integer.
+        # The counter is though.
         for dat in self.statuswindat:
             for tup in dat.arr:
                 if len(tup) > 2:
