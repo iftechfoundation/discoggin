@@ -241,6 +241,7 @@ class GlkState:
         (e.g. line+hypertext or line+timer), allow the player to
         specify both.
         """
+        ### mismatch should return None
         if self.hyperlinkinputwin:
             linklabel = command_is_hyperlink(cmd)
             if linklabel is not None and linklabel in self.hyperlinkkeys:
