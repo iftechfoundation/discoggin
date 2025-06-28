@@ -177,9 +177,9 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
     if format == 'ink':
         terp = os.path.join(terpsdir, 'inkrun.js')
         if firstrun:
-            args = [ terp, '--autodir', autosavedir, gamefile ]
+            args = [ terp, '--start', '--autodir', autosavedir, gamefile ]
         else:
-            args = [ terp, '--autorestore', '--autodir', autosavedir, gamefile ]
+            args = [ terp, '--autodir', autosavedir, gamefile ]
         return (args, {})
         
     return (None, None)
