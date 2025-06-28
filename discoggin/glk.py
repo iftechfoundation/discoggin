@@ -237,11 +237,12 @@ class GlkState:
     def construct_input(self, cmd):
         """Given a player command string, construct a GlkOte input
         appropriate to what the game is expecting.
+        On error, raise an exception -- this will be displayed as a
+        warning line.
         TODO: If the game is expecting more than one kind of input
         (e.g. line+hypertext or line+timer), allow the player to
         specify both.
         """
-        ### mismatch should return None
         if self.hyperlinkinputwin:
             linklabel = command_is_hyperlink(cmd)
             if linklabel is not None:
