@@ -330,6 +330,20 @@ class ContentLine:
         dat.arr = arr
         return dat
 
+    def uniformlink(self):
+        if not self.arr:
+            return None
+        dat = self.arr[0]
+        if len(dat) < 3:
+            return None
+        link = dat[2]
+        for dat in self.arr:
+            if len(dat) < 3:
+                return None
+            if link != dat[2]:
+                return None
+        return link
+
     def add(self, text='', style='normal', link=None):
         if link:
             self.arr.append( (text, style, link) )
