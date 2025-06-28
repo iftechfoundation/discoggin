@@ -244,7 +244,9 @@ class GlkState:
         ### mismatch should return None
         if self.hyperlinkinputwin:
             linklabel = command_is_hyperlink(cmd)
-            if linklabel is not None and linklabel in self.hyperlinkkeys:
+            if linklabel is not None:
+                if linklabel not in self.hyperlinkkeys:
+                    raise Exception('invalid hyperlink value')
                 linkkey = self.hyperlinkkeys[linklabel]
                 return {
                     'type':'hyperlink', 'gen':self.generation,
@@ -258,7 +260,6 @@ class GlkState:
         if self.charinputwin:
             if cmd == 'space':
                 cmd = ' '
-            ### other special cases?
             return {
                 'type':'char', 'gen':self.generation,
                 'window':self.charinputwin, 'value':cmd
@@ -268,6 +269,11 @@ class GlkState:
                 'type':'specialresponse', 'gen':self.generation,
                 'response':'fileref_prompt', 'value':cmd
             }
+        
+        if self.hyperlinkinputwin:
+            # We didn't get a link-style command
+            raise Exception('game is expecting hyperlink input')
+        
         raise Exception('game is not expecting input')
 
 def strkeydict(map):

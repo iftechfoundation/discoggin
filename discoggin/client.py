@@ -666,8 +666,7 @@ class DiscogClient(discord.Client):
                 input = glkstate.construct_input(cmd)
                 indat = json.dumps(input)
             except Exception as ex:
-                logger.error('Unable to construct input: %s', ex, exc_info=ex)
-                await chan.send('Unable to construct input: %s' % (ex,))
+                await chan.send('Input: %s' % (ex,))
                 return
 
             if input.get('type') == 'specialresponse' and input.get('response') == 'fileref_prompt':
