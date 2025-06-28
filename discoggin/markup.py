@@ -36,6 +36,14 @@ def content_to_markup(dat, hyperlinklabels=None):
     ### has some bugs to do with whitespace. E.g. "_This _not_ that._"
     res = []
     curlink = None
+
+    uniformlink = None
+    if hyperlinklabels:
+        uniformlink = dat.uniformlink()
+        if uniformlink:
+            label = hyperlinklabels.get(uniformlink, '???')
+            res.append('[#%s] ' % (label,))
+            curlink = uniformlink
     
     for tup in dat.arr:
         text = tup[0]
@@ -46,7 +54,7 @@ def content_to_markup(dat, hyperlinklabels=None):
                 res.append(']')
             curlink = link
             if curlink is not None:
-                label = hyperlinklabels.get(link, '???')
+                label = hyperlinklabels.get(curlink, '???')
                 res.append('[#%s][' % (label,))
         val = escape(text)
         if style == 'header' or style == 'subheader' or style == 'input':
@@ -59,9 +67,10 @@ def content_to_markup(dat, hyperlinklabels=None):
         else:
             sval = val
         res.append(sval)
-        
-    if curlink is not None:
-        res.append(']')
+
+    if not uniformlink:
+        if curlink is not None:
+            res.append(']')
     
     return ''.join(res)
 
