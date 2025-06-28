@@ -139,8 +139,9 @@ def detect_format(path, filename):
         return 'glulx'
     if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
         return 'zcode'
-    if ext == '.json':
-        # Oh, we could check for the full '.ink.json' suffix
+    if ext in ('.json', '.js'):
+        # Oh, we could check for the full '.ink.json' suffix.
+        # Or for the contents.
         return 'ink'
     return None
 
