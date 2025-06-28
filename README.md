@@ -107,6 +107,10 @@ Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don'
 [Glulxe]: https://github.com/erkyrath/glulxe
 [Bocfel]: https://github.com/erkyrath/bocfel
 
+Install [inkrun.js][] in the `terps` directory.
+
+[inkrun.js]: https://github.com/erkyrath/inkrun-single
+
 Create the bot's SQLite database:
 
 	./venv/bin/python3 -m discoggin createdb
