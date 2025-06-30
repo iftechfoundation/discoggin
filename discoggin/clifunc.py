@@ -80,6 +80,7 @@ def cmd_delsession(args, app):
         print('no such session:', args.sessionid)
         return
 
+    # TODO: There's a tiny race condition here if someone makes a move in the session while we're deleting. Hand this off to the bot and rely on its inflight locking?
     delete_session(app, session.sessid)
     print('deleted session', args.sessionid)
 
@@ -94,6 +95,7 @@ def cmd_delgame(args, app):
         print('game has active sessions:', ', '.join(sessls))
         return
 
+    # TODO: There's a tiny race condition here if someone starts a session while we're deleting.
     delete_game(app, game.hash)
     print('deleted game', game.filename)
     
