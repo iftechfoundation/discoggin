@@ -24,7 +24,7 @@ At present, Discoggin can only play:
 
 - Z-code games (file suffix `.z1` through `.z8` plus `.zblorb`) 
 - Glulx games (file suffix `.ulx` and `.gblorb`)
-- Ink games (file suffix `.json` -- you want the `.ink.json`, specifically)
+- Ink games (file suffix `.json` or `.js`) (you want the `ink.json` file)
 
 It does not support extended display features like graphics or sound. (So `.z6` is not actually going to work.)
 
