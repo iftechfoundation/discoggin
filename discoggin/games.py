@@ -58,6 +58,20 @@ def get_game_by_channel(app, gckey):
         return None
     return get_game_by_session(app, playchan.sessid)
 
+def delete_game(app, hash):
+    """Delete a game and all its files.
+    This is called from the command-line.
+    """
+    game = get_game_by_hash(app, hash)
+    if game is None:
+        return
+    
+    gamefiledir = os.path.join(app.gamesdir, hash)
+    delete_flat_dir(gamefiledir)
+
+    curs = app.db.cursor()
+    curs.execute('DELETE FROM games WHERE hash = ?', (hash,))
+
 # Matches empty string, ".", "..", and so on.
 pat_alldots = re.compile('^[.]*$')
 
@@ -188,4 +202,6 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
 
 # Late imports
 from .sessions import get_playchannel, get_session_by_id
+from .util import delete_flat_dir
+
 

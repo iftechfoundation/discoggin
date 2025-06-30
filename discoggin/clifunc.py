@@ -2,7 +2,8 @@ import sys
 import re
 import logging
 
-from .sessions import get_session_by_id, delete_session
+from .sessions import get_session_by_id, get_sessions_for_hash, delete_session
+from .games import get_game_by_name, delete_game
 
 def cmd_createdb(args, app):
     curs = app.db.cursor()
@@ -80,4 +81,19 @@ def cmd_delsession(args, app):
         return
 
     delete_session(app, session.sessid)
-    print('deleted session')
+    print('deleted session', args.sessionid)
+
+def cmd_delgame(args, app):
+    game = get_game_by_name(app, args.game)
+    if game is None:
+        print('no such game:', args.game)
+        return
+    ls = get_sessions_for_hash(app, game.hash)
+    if ls:
+        sessls = [ str(obj.sessid) for obj in ls ]
+        print('game has active sessions:', ', '.join(sessls))
+        return
+
+    delete_game(app, game.hash)
+    print('deleted game', game.filename)
+    

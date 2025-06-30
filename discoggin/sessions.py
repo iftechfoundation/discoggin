@@ -77,6 +77,18 @@ def get_sessions_for_server(app, gid):
     sessls = [ Session(*tup) for tup in res.fetchall() ]
     return sessls
     
+def get_sessions_for_hash(app, hash, gid=None):
+    """Get all sessions for a given hash. If a server is provided, limit
+    to that.
+    """
+    curs = app.db.cursor()
+    if gid is None:
+        res = curs.execute('SELECT * FROM sessions WHERE hash = ?', (hash,))
+    else:
+        res = curs.execute('SELECT * FROM sessions WHERE hash = ? AND gid = ?', (hash, gid,))
+    sessls = [ Session(*tup) for tup in res.fetchall() ]
+    return sessls
+    
 def get_available_session_for_hash(app, hash, gid):
     """Get an *unused* session for a given game, on a given server.
     The game is identified by hash. If all sessions for game are in
