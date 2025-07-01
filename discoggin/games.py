@@ -218,6 +218,6 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
 
 # Late imports
 from .sessions import get_playchannel, get_session_by_id
-from .util import delete_flat_dir
+from .util import delete_flat_dir, load_json
 
 
