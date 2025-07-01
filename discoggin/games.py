@@ -163,8 +163,16 @@ def detect_format(filename, path=None):
         # We could check for the full '.ink.json' suffix, but that's not
         # reliable; Ink files may be found with just '.js' (and perhaps
         # JSONP at that).
-        # Or for the contents.
-        return 'ink'
+        # Instead, we'll check the contents, if possible.
+        if not path:
+            return '?'
+        try:
+            obj = load_json(path)
+        except:
+            return None
+        if 'inkVersion' in obj:
+            return 'ink'
+        return None
     return None
 
 def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir, autosavedir):
