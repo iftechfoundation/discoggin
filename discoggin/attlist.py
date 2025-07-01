@@ -15,7 +15,7 @@ class AttachList:
             att = Attachment(obj)
         except:
             return
-        if not detect_format(None, att.filename):
+        if not detect_format(att.filename):
             # Doesn't look like a game file.
             return
 

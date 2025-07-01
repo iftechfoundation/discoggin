@@ -123,7 +123,7 @@ async def download_game_url(app, url, filename=None):
         os.remove(tmppath)
         return 'Game is already installed (try **/select %s**)' % (filename,)
 
-    format = detect_format(tmppath, filename)
+    format = detect_format(filename, tmppath)
     if not format:
         os.remove(tmppath)
         return 'Format not recognized: %s' % (url,)
@@ -145,7 +145,13 @@ async def download_game_url(app, url, filename=None):
 
     return game
 
-def detect_format(path, filename):
+def detect_format(filename, path=None):
+    """Figure out the type of a file given its bare filename and, optionally,
+    its full path.
+    In the path=None case, we really only care whether the filename
+    *might* be an IF game, so it's okay that we can't distinguish the
+    type completely. We may return '?' there.
+    """
     _, ext = os.path.splitext(filename)
     ext = ext.lower()
 
@@ -154,7 +160,9 @@ def detect_format(path, filename):
     if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
         return 'zcode'
     if ext in ('.json', '.js'):
-        # Oh, we could check for the full '.ink.json' suffix.
+        # We could check for the full '.ink.json' suffix, but that's not
+        # reliable; Ink files may be found with just '.js' (and perhaps
+        # JSONP at that).
         # Or for the contents.
         return 'ink'
     return None
