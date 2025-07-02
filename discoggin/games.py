@@ -172,6 +172,8 @@ def detect_format(filename, path=None):
             return None
         if 'inkVersion' in obj:
             return 'ink'
+        if 'program' in obj and 'strings' in obj:
+            return 'ys'
         return None
     return None
 
