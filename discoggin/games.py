@@ -215,6 +215,14 @@ def format_interpreter_args(format, firstrun, *, gamefile, terpsdir, savefiledir
             args = [ terp, '--autodir', autosavedir, gamefile ]
         return (args, {})
         
+    if format == 'ys':
+        terp = os.path.join(terpsdir, 'ysrun')
+        if firstrun:
+            args = [ terp, '--start', '--autodir', autosavedir, gamefile ]
+        else:
+            args = [ terp, '--autodir', autosavedir, gamefile ]
+        return (args, {})
+        
     return (None, None)
         
 
