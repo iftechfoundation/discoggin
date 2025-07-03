@@ -24,7 +24,8 @@ At present, Discoggin can only play:
 
 - Z-code games (file suffix `.z1` through `.z8` plus `.zblorb`) 
 - Glulx games (file suffix `.ulx` and `.gblorb`)
-- Ink games (file suffix `.json` or `.js`) (you want the `ink.json` file)
+- Ink games (file suffix `.json` or `.js`)
+- YarnSpinner games (file suffix `.json` or `.js`)
 
 It does not support extended display features like graphics or sound. (So `.z6` is not actually going to work.)
 
@@ -37,6 +38,7 @@ There is currently no way to download save files. Similarly, you can create a tr
 Discoggin is controlled with the usual sort of Discord slash commands.
 
 - **/install** _URL_ : Download and install a game for play.
+- **/install** _FILENAME_ : Install a game recently uploaded to the Discord channel. (Upload a game file in the usual Discord way, then give its filename.)
 - **/games** : List games available for play.
 - **/channels** : List channels available to play on.
 - **/sessions** : List game sessions in progress.
@@ -107,9 +109,13 @@ Compile [Glulxe][] and [Bocfel][] with the [RemGlk][] library. I'm afraid I don'
 [Glulxe]: https://github.com/erkyrath/glulxe
 [Bocfel]: https://github.com/erkyrath/bocfel
 
-Install [inkrun.js][] in the `terps` directory.
+Install [inkrun.js][] in the `terps` directory. (Requires Node.js.)
 
 [inkrun.js]: https://github.com/erkyrath/inkrun-single
+
+Compile and install [ysrun][] in the `terps` directory. (Requires .NET.)
+
+[ysrun]: https://github.com/erkyrath/YSRun-Single
 
 Create the bot's SQLite database:
 
