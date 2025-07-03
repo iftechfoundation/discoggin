@@ -37,10 +37,13 @@ def get_game_by_hash(app, hash):
     return GameFile(*tup)
 
 def get_game_by_name(app, val):
-    val = val.lower()
     ls = get_gamelist(app)
     for game in ls:
-        if val in game.filename.lower():
+        if game.hash == val:
+            return game
+    lval = val.lower()
+    for game in ls:
+        if lval in game.filename.lower():
             return game
     return None
 
@@ -156,8 +159,10 @@ def detect_format(filename, path=None):
     ext = ext.lower()
 
     if ext in ('.ulx', '.gblorb'):
+        ### verify first word, if possible
         return 'glulx'
     if ext in ('.z1', '.z2', '.z3', '.z4', '.z5', '.z6', '.z7', '.z8', '.zblorb'):
+        ### verify first byte, if possible
         return 'zcode'
     if ext in ('.json', '.js'):
         # We could check for the full '.ink.json' suffix, but that's not
