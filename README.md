@@ -8,6 +8,8 @@
 
 Discoggin (the name doesn't mean anything) allows players to run old-style interactive fiction games in a Discord channel. You play by typing commands like `>GET LAMP` as regular Discord chat messages. The initial `>` indicates a game command. The bot will carry out the command and respond with the game's output.
 
+It can also play newer-style choice-based games. For these, it will show numbered choices; you type a command like `>#2` to select one.
+
 Discoggin is configured to run on specific Discord channels, which are assumed to be dedicated to playing IF. (Non-players can mute the those channels.) It can only play one game at a time per channel, but it can keep any number of game sessions paused in the background. A "session" is a particular game along with its current state and any save files you've created.
 
 (The idea is that one group of players might log in on Tuesdays to play game X, while another group is playing game Y on Thursdays. You just have to **/select** your game session when you arrive in the channel. You will be back in your game, exactly where you left off.)
