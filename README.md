@@ -37,8 +37,8 @@ There is currently no way to download save files. Similarly, you can create a tr
 
 Discoggin is controlled with the usual sort of Discord slash commands.
 
-- **/install** _URL_ : Download and install a game for play.
-- **/install** _FILENAME_ : Install a game recently uploaded to the Discord channel. (Upload a game file in the usual Discord way, then give its filename.)
+- **/install** _URL_ : Download a game from a web site and install it for play.
+- **/install** _FILENAME_ : Install a game recently uploaded to the Discord channel. (Upload the game file in the usual Discord way, then give its filename.)
 - **/games** : List games available for play.
 - **/channels** : List channels available to play on.
 - **/sessions** : List game sessions in progress.
