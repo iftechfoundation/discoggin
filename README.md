@@ -31,8 +31,6 @@ At present, Discoggin can only play:
 
 It does not support extended display features like graphics or sound. (So `.z6` is not actually going to work.)
 
-`UNDO` does not work in Z-code games.
-
 There is currently no way to download save files. Similarly, you can create a transcript, but there is no way to view it.
 
 ## Slash commands
